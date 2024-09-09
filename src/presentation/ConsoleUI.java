@@ -67,9 +67,8 @@ public class ConsoleUI {
     }
 
     private void createLivre() throws SQLException {
-        System.out.print("Enter ID: ");
-        int id = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        // Generate ID and collect other details
+        String id = generateNextId("L");
 
         System.out.print("Enter Title: ");
         String titre = scanner.nextLine();
@@ -93,9 +92,8 @@ public class ConsoleUI {
     }
 
     private void createMagazine() throws SQLException {
-        System.out.print("Enter ID: ");
-        int id = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        // Generate ID and collect other details
+        String id = generateNextId("M");
 
         System.out.print("Enter Title: ");
         String titre = scanner.nextLine();
@@ -119,9 +117,8 @@ public class ConsoleUI {
     }
 
     private void createTheseUniversitaire() throws SQLException {
-        System.out.print("Enter ID: ");
-        int id = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        // Generate ID and collect other details
+        String id = generateNextId("T");
 
         System.out.print("Enter Title: ");
         String titre = scanner.nextLine();
@@ -146,9 +143,8 @@ public class ConsoleUI {
     }
 
     private void createJournalScientifique() throws SQLException {
-        System.out.print("Enter ID: ");
-        int id = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        // Generate ID and collect other details
+        String id = generateNextId("J");
 
         System.out.print("Enter Title: ");
         String titre = scanner.nextLine();
@@ -170,6 +166,30 @@ public class ConsoleUI {
                 nombreDePages, domaineRecherche);
         documentDAO.create(journalScientifique);
         System.out.println("Journal Scientifique created successfully.");
+    }
+
+    private String generateNextId(String prefix) {
+        // Retrieve the next ID from the database or maintain a counter to generate new
+        // IDs
+        // Here, we just simulate this by incrementing a static counter
+        // Implement logic to get the current highest ID from the database and increment
+        // it
+        // For now, this is a placeholder to generate an ID
+
+        // Example implementation (replace with actual logic):
+        int nextNumber = getNextDocumentNumber(prefix);
+        return prefix + "-" + nextNumber;
+    }
+
+    private int getNextDocumentNumber(String prefix) {
+        // Implement logic to get the next number for the given prefix
+        // For example, querying the database to find the highest number with the given
+        // prefix and increment it
+        // For now, this is a placeholder and should be replaced with actual database
+        // logic
+
+        // Example static increment (replace with actual implementation):
+        return 1; // Replace with actual logic
     }
 
     public static void main(String[] args) {
