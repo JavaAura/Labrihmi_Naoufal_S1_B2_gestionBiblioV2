@@ -3,13 +3,13 @@ package essentiel.doc;
 import java.time.LocalDate;
 
 public abstract class Document {
-    private int id;
+    private String id;
     private String titre;
     private String auteur;
     private LocalDate datePublication;
     private int nombreDePages;
 
-    public Document(int id, String titre, String auteur, LocalDate datePublication, int nombreDePages) {
+    public Document(String id, String titre, String auteur, LocalDate datePublication, int nombreDePages) {
         this.id = id;
         this.titre = titre;
         this.auteur = auteur;
@@ -17,11 +17,11 @@ public abstract class Document {
         this.nombreDePages = nombreDePages;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
