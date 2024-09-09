@@ -24,17 +24,17 @@ public class DocumentDAOImpl implements DocumentDAO {
         if (document instanceof Livre) {
             sql = "INSERT INTO livre (id, titre, auteur, date_publication, nombre_de_pages, isbn) VALUES (?, ?, ?, ?, ?, ?)";
         } else if (document instanceof Magazine) {
-            sql = "INSERT INTO magazine (id, titre, auteur, datePublication, nombreDePages, numero) VALUES (?, ?, ?, ?, ?, ?)";
+            sql = "INSERT INTO magazine (id, titre, auteur, date_publication, nombre_de_pages, numero) VALUES (?, ?, ?, ?, ?, ?)";
         } else if (document instanceof TheseUniversitaire) {
-            sql = "INSERT INTO these_universitaire (id, titre, auteur, datePublication, nombreDePages, university) VALUES (?, ?, ?, ?, ?, ?)";
+            sql = "INSERT INTO these_universitaire (id, titre, auteur, date_publication, nombre_de_pages, university) VALUES (?, ?, ?, ?, ?, ?)";
         } else if (document instanceof JournalScientifique) {
-            sql = "INSERT INTO journal_scientifique (id, titre, auteur, datePublication, nombreDePages, domaineRecherche) VALUES (?, ?, ?, ?, ?, ?)";
+            sql = "INSERT INTO journal_scientifique (id, titre, auteur, date_publication, nombre_de_pages, domaine_recherche) VALUES (?, ?, ?, ?, ?, ?)";
         } else {
             throw new IllegalArgumentException("Unsupported document type");
         }
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setInt(1, document.getId());
+            pstmt.setString(1, getNextId(document));
             pstmt.setString(2, document.getTitre());
             pstmt.setString(3, document.getAuteur());
             pstmt.setDate(4, Date.valueOf(document.getDatePublication()));
@@ -49,7 +49,34 @@ public class DocumentDAOImpl implements DocumentDAO {
             } else if (document instanceof JournalScientifique) {
                 pstmt.setString(6, ((JournalScientifique) document).getDomaineRecherche());
             }
+
             pstmt.executeUpdate();
+        }
+    }
+
+    private String getNextId(Document document) throws SQLException {
+        String prefix;
+        if (document instanceof Livre) {
+            prefix = "L-";
+        } else if (document instanceof Magazine) {
+            prefix = "M-";
+        } else if (document instanceof TheseUniversitaire) {
+            prefix = "T-";
+        } else if (document instanceof JournalScientifique) {
+            prefix = "J-";
+        } else {
+            throw new IllegalArgumentException("Unsupported document type");
+        }
+
+        String sql = "SELECT nextval('document_id_seq')"; // Use the sequence for generating unique IDs
+        try (Statement stmt = connection.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                int id = rs.getInt(1);
+                return prefix + id;
+            } else {
+                throw new SQLException("Failed to retrieve next ID");
+            }
         }
     }
 
