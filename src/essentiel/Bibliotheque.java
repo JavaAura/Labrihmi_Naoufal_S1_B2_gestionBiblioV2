@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import essentiel.doc.Document;
 
 public class Bibliotheque {
     private List<Document> documents;
-    private Map<Integer, Document> documentMap;
+    private Map<String, Document> documentMap; // Change the key type to String
 
     public Bibliotheque() {
         this.documents = new ArrayList<>();
@@ -18,10 +17,10 @@ public class Bibliotheque {
 
     public void ajouterDocument(Document document) {
         documents.add(document);
-        documentMap.put(document.getId(), document);
+        documentMap.put(document.getId(), document); // Use String ID
     }
 
-    public Document trouverDocumentParId(int id) {
+    public Document trouverDocumentParId(String id) { // Change the parameter type to String
         return documentMap.get(id);
     }
 
