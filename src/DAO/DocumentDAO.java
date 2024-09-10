@@ -8,11 +8,11 @@ import essentiel.doc.Document;
 public interface DocumentDAO {
     void create(Document document) throws SQLException;
 
-    Document read(int id) throws SQLException;
+    Document read(String id) throws SQLException;
 
     void update(Document document) throws SQLException;
 
-    void delete(int id) throws SQLException;
+    void delete(String id) throws SQLException;
 
     List<Document> findAll() throws SQLException;
 }
