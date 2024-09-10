@@ -1,6 +1,7 @@
 package DaoImpl;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,24 +82,195 @@ public class DocumentDAOImpl implements DocumentDAO {
     }
 
     @Override
-    public Document read(int id) throws SQLException {
-        // Implement this method to retrieve a document by id
-        return null;
+    public Document read(String id) throws SQLException {
+        Document document = null;
+        String sql = "";
+        if (id.startsWith("L-")) {
+            sql = "SELECT * FROM livre WHERE id = ?";
+        } else if (id.startsWith("M-")) {
+            sql = "SELECT * FROM magazine WHERE id = ?";
+        } else if (id.startsWith("T-")) {
+            sql = "SELECT * FROM these_universitaire WHERE id = ?";
+        } else if (id.startsWith("J-")) {
+            sql = "SELECT * FROM journal_scientifique WHERE id = ?";
+        } else {
+            throw new IllegalArgumentException("Unsupported document type");
+        }
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Common attributes
+                    String titre = rs.getString("titre");
+                    String auteur = rs.getString("auteur");
+                    LocalDate datePublication = rs.getDate("date_publication").toLocalDate();
+                    int nombreDePages = rs.getInt("nombre_de_pages");
+
+                    if (id.startsWith("L-")) {
+                        String isbn = rs.getString("isbn");
+                        document = new Livre(id, titre, auteur, datePublication, nombreDePages, isbn);
+                    } else if (id.startsWith("M-")) {
+                        int numero = rs.getInt("numero");
+                        document = new Magazine(id, titre, auteur, datePublication, nombreDePages, numero);
+                    } else if (id.startsWith("T-")) {
+                        String university = rs.getString("university");
+                        document = new TheseUniversitaire(id, titre, auteur, datePublication, nombreDePages,
+                                university);
+                    } else if (id.startsWith("J-")) {
+                        String domaineRecherche = rs.getString("domaine_recherche");
+                        document = new JournalScientifique(id, titre, auteur, datePublication, nombreDePages,
+                                domaineRecherche);
+                    }
+                }
+            }
+        }
+
+        return document;
+    }
+
+    private String getTypeFromId(String id) {
+        // Extract the type from the ID
+        return id.split("-")[0]; // Assumes IDs are in format: "L-1", "M-1", etc.
+    }
+
+    private Livre readLivre(ResultSet rs) throws SQLException {
+        return new Livre(
+                rs.getString("id"),
+                rs.getString("titre"),
+                rs.getString("auteur"),
+                rs.getDate("date_publication").toLocalDate(),
+                rs.getInt("nombre_de_pages"),
+                rs.getString("isbn"));
+    }
+
+    private Magazine readMagazine(ResultSet rs) throws SQLException {
+        return new Magazine(
+                rs.getString("id"),
+                rs.getString("titre"),
+                rs.getString("auteur"),
+                rs.getDate("date_publication").toLocalDate(),
+                rs.getInt("nombre_de_pages"),
+                rs.getInt("numero"));
+    }
+
+    private TheseUniversitaire readTheseUniversitaire(ResultSet rs) throws SQLException {
+        return new TheseUniversitaire(
+                rs.getString("id"),
+                rs.getString("titre"),
+                rs.getString("auteur"),
+                rs.getDate("date_publication").toLocalDate(),
+                rs.getInt("nombre_de_pages"),
+                rs.getString("university"));
+    }
+
+    private JournalScientifique readJournalScientifique(ResultSet rs) throws SQLException {
+        return new JournalScientifique(
+                rs.getString("id"),
+                rs.getString("titre"),
+                rs.getString("auteur"),
+                rs.getDate("date_publication").toLocalDate(),
+                rs.getInt("nombre_de_pages"),
+                rs.getString("domaine_recherche"));
     }
 
     @Override
     public void update(Document document) throws SQLException {
-        // Implement this method to update a document
+        String sql;
+        if (document instanceof Livre) {
+            sql = "UPDATE livre SET titre = ?, auteur = ?, date_publication = ?, nombre_de_pages = ?, isbn = ? WHERE id = ?";
+        } else if (document instanceof Magazine) {
+            sql = "UPDATE magazine SET titre = ?, auteur = ?, date_publication = ?, nombre_de_pages = ?, numero = ? WHERE id = ?";
+        } else if (document instanceof TheseUniversitaire) {
+            sql = "UPDATE these_universitaire SET titre = ?, auteur = ?, date_publication = ?, nombre_de_pages = ?, university = ? WHERE id = ?";
+        } else if (document instanceof JournalScientifique) {
+            sql = "UPDATE journal_scientifique SET titre = ?, auteur = ?, date_publication = ?, nombre_de_pages = ?, domaine_recherche = ? WHERE id = ?";
+        } else {
+            throw new IllegalArgumentException("Unsupported document type");
+        }
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, document.getTitre());
+            pstmt.setString(2, document.getAuteur());
+            pstmt.setDate(3, Date.valueOf(document.getDatePublication()));
+            pstmt.setInt(4, document.getNombreDePages());
+
+            if (document instanceof Livre) {
+                pstmt.setString(5, ((Livre) document).getIsbn());
+            } else if (document instanceof Magazine) {
+                pstmt.setInt(5, ((Magazine) document).getNumero());
+            } else if (document instanceof TheseUniversitaire) {
+                pstmt.setString(5, ((TheseUniversitaire) document).getUniversity());
+            } else if (document instanceof JournalScientifique) {
+                pstmt.setString(5, ((JournalScientifique) document).getDomaineRecherche());
+            }
+
+            pstmt.setString(6, document.getId());
+            pstmt.executeUpdate();
+        }
     }
 
     @Override
-    public void delete(int id) throws SQLException {
-        // Implement this method to delete a document by id
+    public void delete(String id) throws SQLException {
+        String sql;
+        String type = getTypeFromId(id); // You need to implement this method
+
+        switch (type) {
+            case "L":
+                sql = "DELETE FROM livre WHERE id = ?";
+                break;
+            case "M":
+                sql = "DELETE FROM magazine WHERE id = ?";
+                break;
+            case "T":
+                sql = "DELETE FROM these_universitaire WHERE id = ?";
+                break;
+            case "J":
+                sql = "DELETE FROM journal_scientifique WHERE id = ?";
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported document type");
+        }
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
+        }
     }
 
     @Override
     public List<Document> findAll() throws SQLException {
-        // Implement this method to retrieve all documents
-        return new ArrayList<>();
+        List<Document> documents = new ArrayList<>();
+        String[] tables = { "livre", "magazine", "these_universitaire", "journal_scientifique" };
+
+        for (String table : tables) {
+            String sql = "SELECT * FROM " + table;
+            try (Statement stmt = connection.createStatement();
+                    ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    String id = rs.getString("id");
+                    String type = getTypeFromId(id);
+
+                    switch (type) {
+                        case "L":
+                            documents.add(readLivre(rs));
+                            break;
+                        case "M":
+                            documents.add(readMagazine(rs));
+                            break;
+                        case "T":
+                            documents.add(readTheseUniversitaire(rs));
+                            break;
+                        case "J":
+                            documents.add(readJournalScientifique(rs));
+                            break;
+                        default:
+                            throw new SQLException("Unknown document type");
+                    }
+                }
+            }
+        }
+        return documents;
     }
+
 }
