@@ -3,6 +3,7 @@ package presentation;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Scanner;
 
 import DB.DatabaseConnection;
@@ -35,7 +36,11 @@ public class ConsoleUI {
             System.out.println("2. Create Magazine");
             System.out.println("3. Create TheseUniversitaire");
             System.out.println("4. Create JournalScientifique");
-            System.out.println("5. Exit");
+            System.out.println("5. Read Document");
+            System.out.println("6. Update Document");
+            System.out.println("7. Delete Document");
+            System.out.println("8. List All Documents");
+            System.out.println("9. Exit");
 
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
@@ -55,6 +60,18 @@ public class ConsoleUI {
                         createJournalScientifique();
                         break;
                     case 5:
+                        readDocument();
+                        break;
+                    case 6:
+                        updateDocument();
+                        break;
+                    case 7:
+                        deleteDocument();
+                        break;
+                    case 8:
+                        findAllDocuments();
+                        break;
+                    case 9:
                         System.out.println("Exiting...");
                         return;
                     default:
@@ -190,6 +207,135 @@ public class ConsoleUI {
 
         // Example static increment (replace with actual implementation):
         return 1; // Replace with actual logic
+    }
+
+    private void readDocument() throws SQLException {
+        System.out.print("Enter Document ID to read: ");
+        String id = scanner.nextLine();
+
+        Document document = documentDAO.read(id);
+        if (document != null) {
+            System.out.println("Document Details:");
+            System.out.println("ID: " + document.getId());
+            System.out.println("Title: " + document.getTitre());
+            System.out.println("Author: " + document.getAuteur());
+            System.out.println("Publication Date: " + document.getDatePublication());
+            System.out.println("Number of Pages: " + document.getNombreDePages());
+
+            if (document instanceof Livre) {
+                System.out.println("ISBN: " + ((Livre) document).getIsbn());
+            } else if (document instanceof Magazine) {
+                System.out.println("Issue Number: " + ((Magazine) document).getNumero());
+            } else if (document instanceof TheseUniversitaire) {
+                System.out.println("University: " + ((TheseUniversitaire) document).getUniversity());
+            } else if (document instanceof JournalScientifique) {
+                System.out.println("Research Domain: " + ((JournalScientifique) document).getDomaineRecherche());
+            }
+        } else {
+            System.out.println("Document not found.");
+        }
+    }
+
+    private void updateDocument() throws SQLException {
+        System.out.print("Enter Document ID to update: ");
+        String id = scanner.nextLine();
+
+        Document document = documentDAO.read(id);
+        if (document != null) {
+            // Gather new details
+            System.out.print("Enter new Title (leave empty to keep current): ");
+            String titre = scanner.nextLine();
+            if (!titre.isEmpty()) {
+                document.setTitre(titre);
+            }
+
+            System.out.print("Enter new Author (leave empty to keep current): ");
+            String auteur = scanner.nextLine();
+            if (!auteur.isEmpty()) {
+                document.setAuteur(auteur);
+            }
+
+            System.out.print("Enter new Publication Date (yyyy-MM-dd, leave empty to keep current): ");
+            String datePublicationStr = scanner.nextLine();
+            if (!datePublicationStr.isEmpty()) {
+                LocalDate datePublication = LocalDate.parse(datePublicationStr);
+                document.setDatePublication(datePublication);
+            }
+
+            System.out.print("Enter new Number of Pages (leave empty to keep current): ");
+            String nombreDePagesStr = scanner.nextLine();
+            if (!nombreDePagesStr.isEmpty()) {
+                int nombreDePages = Integer.parseInt(nombreDePagesStr);
+                document.setNombreDePages(nombreDePages);
+            }
+
+            // Update specific attributes based on document type
+            if (document instanceof Livre) {
+                System.out.print("Enter new ISBN (leave empty to keep current): ");
+                String isbn = scanner.nextLine();
+                if (!isbn.isEmpty()) {
+                    ((Livre) document).setIsbn(isbn);
+                }
+            } else if (document instanceof Magazine) {
+                System.out.print("Enter new Issue Number (leave empty to keep current): ");
+                String numeroStr = scanner.nextLine();
+                if (!numeroStr.isEmpty()) {
+                    int numero = Integer.parseInt(numeroStr);
+                    ((Magazine) document).setNumero(numero);
+                }
+            } else if (document instanceof TheseUniversitaire) {
+                System.out.print("Enter new University (leave empty to keep current): ");
+                String university = scanner.nextLine();
+                if (!university.isEmpty()) {
+                    ((TheseUniversitaire) document).setUniversity(university);
+                }
+            } else if (document instanceof JournalScientifique) {
+                System.out.print("Enter new Research Domain (leave empty to keep current): ");
+                String domaineRecherche = scanner.nextLine();
+                if (!domaineRecherche.isEmpty()) {
+                    ((JournalScientifique) document).setDomaineRecherche(domaineRecherche);
+                }
+            }
+
+            documentDAO.update(document);
+            System.out.println("Document updated successfully.");
+        } else {
+            System.out.println("Document not found.");
+        }
+    }
+
+    private void deleteDocument() throws SQLException {
+        System.out.print("Enter Document ID to delete: ");
+        String id = scanner.nextLine();
+
+        documentDAO.delete(id);
+        System.out.println("Document deleted successfully.");
+    }
+
+    private void findAllDocuments() throws SQLException {
+        List<Document> documents = documentDAO.findAll();
+        if (!documents.isEmpty()) {
+            for (Document document : documents) {
+                System.out.println("Document ID: " + document.getId());
+                System.out.println("Title: " + document.getTitre());
+                System.out.println("Author: " + document.getAuteur());
+                System.out.println("Publication Date: " + document.getDatePublication());
+                System.out.println("Number of Pages: " + document.getNombreDePages());
+
+                if (document instanceof Livre) {
+                    System.out.println("ISBN: " + ((Livre) document).getIsbn());
+                } else if (document instanceof Magazine) {
+                    System.out.println("Issue Number: " + ((Magazine) document).getNumero());
+                } else if (document instanceof TheseUniversitaire) {
+                    System.out.println("University: " + ((TheseUniversitaire) document).getUniversity());
+                } else if (document instanceof JournalScientifique) {
+                    System.out.println("Research Domain: " + ((JournalScientifique) document).getDomaineRecherche());
+                }
+                System.out.println();
+            }
+        } else {
+            System.out.println("No documents found.");
+        }
     }
 
     public static void main(String[] args) {
