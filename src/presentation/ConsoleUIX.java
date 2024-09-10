@@ -46,9 +46,8 @@ public class ConsoleUIX {
                     listUsers();
                     break;
                 case 6:
-                    running = false;
                     System.out.println("Exiting...");
-                    break;
+                    return;
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
