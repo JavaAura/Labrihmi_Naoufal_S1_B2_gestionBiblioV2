@@ -4,6 +4,7 @@ import DaoImpl.UtilisateurDAOImpl;
 import essentiel.Users.Utilisateur;
 import essentiel.Users.Etudiant;
 import essentiel.Users.Professeur;
+import utilitaire.InputValidator;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,11 +15,13 @@ public class ConsoleUIX {
     private UtilisateurDAOImpl utilisateurDAO;
     private Scanner scanner;
     private Connection connection;
+    private InputValidator inputValidator;
 
     public ConsoleUIX(Connection connection) {
         this.connection = connection;
         this.utilisateurDAO = new UtilisateurDAOImpl(connection);
         this.scanner = new Scanner(System.in);
+        this.inputValidator = new InputValidator(scanner); // Initialize InputValidator
     }
 
     public void run() {
@@ -27,7 +30,7 @@ public class ConsoleUIX {
         while (running) {
             displayMenu();
 
-            int option = getUserInput("Choose an option: ");
+            int option = inputValidator.promptInt("Choose an option: ");
 
             switch (option) {
                 case 1:
@@ -65,21 +68,11 @@ public class ConsoleUIX {
         System.out.println("6. Exit");
     }
 
-    private int getUserInput(String prompt) {
-        System.out.print(prompt);
-        while (!scanner.hasNextInt()) {
-            System.out.println("Invalid input. Please enter a number.");
-            scanner.next(); // Clear invalid input
-            System.out.print(prompt);
-        }
-        return scanner.nextInt();
-    }
-
     private void createUser() {
         System.out.println("Select user type:");
         System.out.println("1. Etudiant");
         System.out.println("2. Professeur");
-        int userType = getUserInput("Enter choice: ");
+        int userType = inputValidator.promptInt("Enter choice: ");
         scanner.nextLine(); // Consume newline
 
         switch (userType) {
@@ -95,15 +88,10 @@ public class ConsoleUIX {
     }
 
     private void createEtudiant() {
-        System.out.print("Enter name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter email: ");
-        String email = scanner.nextLine();
-        System.out.print("Enter age: ");
-        int age = getUserInput("Enter age: ");
-        scanner.nextLine(); // Consume newline
-        System.out.print("Enter CNE: ");
-        String cne = scanner.nextLine();
+        String name = inputValidator.promptString("Enter name: ");
+        String email = inputValidator.promptValidEmail("Enter email: ");
+        int age = inputValidator.promptValidAge("Enter age: ");
+        String cne = inputValidator.promptValidCNE("Enter CNE: ");
 
         try {
             Etudiant etudiant = new Etudiant(null, name, email, age, cne); // ID will be generated
@@ -115,15 +103,10 @@ public class ConsoleUIX {
     }
 
     private void createProfesseur() {
-        System.out.print("Enter name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter email: ");
-        String email = scanner.nextLine();
-        System.out.print("Enter age: ");
-        int age = getUserInput("Enter age: ");
-        scanner.nextLine(); // Consume newline
-        System.out.print("Enter CIN: ");
-        String cin = scanner.nextLine();
+        String name = inputValidator.promptString("Enter name: ");
+        String email = inputValidator.promptValidEmail("Enter email: ");
+        int age = inputValidator.promptValidAge("Enter age: ");
+        String cin = inputValidator.promptValidCIN("Enter CIN: ");
 
         try {
             Professeur professeur = new Professeur(null, name, email, age, cin); // ID will be generated
@@ -135,16 +118,14 @@ public class ConsoleUIX {
     }
 
     private void readUser() {
-        System.out.print("Enter user ID to read: ");
-        scanner.nextLine(); // Clear the newline character from previous input
-        String id = scanner.nextLine().trim(); // Read the ID input from the user
+        String id = inputValidator.promptString("Enter user ID to read: ").trim();
 
         if (id.isEmpty()) {
             System.out.println("Error: ID is empty. Please enter a valid ID.");
             return;
         }
 
-        System.out.println("Executing query for ID: " + id);
+        System.out.println("User for ID " + id + " is:");
 
         try {
             Utilisateur utilisateur = utilisateurDAO.read(id);
@@ -159,33 +140,25 @@ public class ConsoleUIX {
     }
 
     private void updateUser() {
-        System.out.print("Enter user ID to update: ");
-        scanner.nextLine(); // Clear the newline character from previous input
-        String id = scanner.nextLine();
+        String id = inputValidator.promptString("Enter user ID to update: ").trim();
 
         if (id.isEmpty()) {
             System.out.println("Error: ID is empty. Please enter a valid ID.");
             return;
         }
 
-        System.out.print("Enter new Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Enter new Email: ");
-        String email = scanner.nextLine();
-        System.out.print("Enter new Age: ");
-        int age = getUserInput("Enter age: ");
-        scanner.nextLine(); // Consume newline
+        String name = inputValidator.promptString("Enter new Name: ");
+        String email = inputValidator.promptValidEmail("Enter new Email: ");
+        int age = inputValidator.promptValidAge("Enter new Age: ");
 
         try {
             Utilisateur utilisateur = utilisateurDAO.read(id);
             if (utilisateur != null) {
                 if (utilisateur instanceof Etudiant) {
-                    System.out.print("Enter new CNE: ");
-                    String cne = scanner.nextLine();
+                    String cne = inputValidator.promptValidCNE("Enter new CNE: ");
                     utilisateur = new Etudiant(id, name, email, age, cne);
                 } else if (utilisateur instanceof Professeur) {
-                    System.out.print("Enter new CIN: ");
-                    String cin = scanner.nextLine();
+                    String cin = inputValidator.promptValidCIN("Enter new CIN: ");
                     utilisateur = new Professeur(id, name, email, age, cin);
                 }
 
@@ -200,10 +173,7 @@ public class ConsoleUIX {
     }
 
     private void deleteUser() {
-        System.out.print("Enter user ID to delete: ");
-        scanner.nextLine(); // Clear the newline character from previous input
-
-        String id = scanner.nextLine();
+        String id = inputValidator.promptString("Enter user ID to delete: ").trim();
 
         if (id.isEmpty()) {
             System.out.println("Error: ID is empty. Please enter a valid ID.");
