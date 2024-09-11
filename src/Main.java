@@ -17,7 +17,7 @@ public class Main {
             Scanner scanner = new Scanner(System.in);
 
             while (true) {
-                // Display menu to choose between ConsoleUI and ConsoleUIX
+                // Display menu to choose between ConsoleUI, ConsoleUIX, and ConsoleUIE
                 System.out.println("1. Run ConsoleUI");
                 System.out.println("2. Run ConsoleUIX");
                 System.out.println("3. Exit");
