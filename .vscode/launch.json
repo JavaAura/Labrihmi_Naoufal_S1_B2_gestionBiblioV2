@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ConsoleUIE",
+            "request": "launch",
+            "mainClass": "presentation.ConsoleUIE",
+            "projectName": "Labrihmi_Naoufal_S1_B2_gestionBiblioV2_7b285370"
+        },
+        {
+            "type": "java",
             "name": "ConsoleUIX",
             "request": "launch",
             "mainClass": "presentation.ConsoleUIX",
