@@ -54,6 +54,21 @@ public class InputValidator {
         }
     }
 
+    public String promptValidName(String message) {
+        while (true) {
+            String name = promptString(message);
+            if (isValidName(name)) {
+                return name;
+            }
+            System.out.println("Invalid name. Please enter a name containing only letters and spaces.");
+        }
+    }
+
+    private boolean isValidName(String name) {
+        // Check if name contains only letters and spaces
+        return name != null && name.matches("[a-zA-Z\\s]+");
+    }
+
     public int promptValidAge(String message) {
         while (true) {
             int age = promptInt(message);

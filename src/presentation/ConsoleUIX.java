@@ -88,7 +88,7 @@ public class ConsoleUIX {
     }
 
     private void createEtudiant() {
-        String name = inputValidator.promptString("Enter name: ");
+        String name = inputValidator.promptValidName("Enter name: ");
         String email = inputValidator.promptValidEmail("Enter email: ");
         int age = inputValidator.promptValidAge("Enter age: ");
         String cne = inputValidator.promptValidCNE("Enter CNE: ");
@@ -103,7 +103,7 @@ public class ConsoleUIX {
     }
 
     private void createProfesseur() {
-        String name = inputValidator.promptString("Enter name: ");
+        String name = inputValidator.promptValidName("Enter name: ");
         String email = inputValidator.promptValidEmail("Enter email: ");
         int age = inputValidator.promptValidAge("Enter age: ");
         String cin = inputValidator.promptValidCIN("Enter CIN: ");
@@ -147,7 +147,7 @@ public class ConsoleUIX {
             return;
         }
 
-        String name = inputValidator.promptString("Enter new Name: ");
+        String name = inputValidator.promptValidName("Enter new Name: ");
         String email = inputValidator.promptValidEmail("Enter new Email: ");
         int age = inputValidator.promptValidAge("Enter new Age: ");
 
