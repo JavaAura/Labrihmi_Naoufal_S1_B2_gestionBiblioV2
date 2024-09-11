@@ -106,20 +106,26 @@ public class DocumentDAOImpl implements DocumentDAO {
                     String auteur = rs.getString("auteur");
                     LocalDate datePublication = rs.getDate("date_publication").toLocalDate();
                     int nombreDePages = rs.getInt("nombre_de_pages");
+                    boolean emprunter = rs.getBoolean("emprunter");
+                    boolean reservation = rs.getBoolean("reservation");
 
                     if (id.startsWith("L-")) {
                         String isbn = rs.getString("isbn");
-                        document = new Livre(id, titre, auteur, datePublication, nombreDePages, isbn);
+                        document = new Livre(id, titre, auteur, datePublication, nombreDePages, emprunter, reservation,
+                                isbn);
                     } else if (id.startsWith("M-")) {
                         int numero = rs.getInt("numero");
-                        document = new Magazine(id, titre, auteur, datePublication, nombreDePages, numero);
+                        document = new Magazine(id, titre, auteur, datePublication, nombreDePages, emprunter,
+                                reservation, numero);
                     } else if (id.startsWith("T-")) {
                         String university = rs.getString("university");
-                        document = new TheseUniversitaire(id, titre, auteur, datePublication, nombreDePages,
+                        document = new TheseUniversitaire(id, titre, auteur, datePublication, nombreDePages, emprunter,
+                                reservation,
                                 university);
                     } else if (id.startsWith("J-")) {
                         String domaineRecherche = rs.getString("domaine_recherche");
-                        document = new JournalScientifique(id, titre, auteur, datePublication, nombreDePages,
+                        document = new JournalScientifique(id, titre, auteur, datePublication, nombreDePages, emprunter,
+                                reservation,
                                 domaineRecherche);
                     }
                 }
@@ -141,6 +147,8 @@ public class DocumentDAOImpl implements DocumentDAO {
                 rs.getString("auteur"),
                 rs.getDate("date_publication").toLocalDate(),
                 rs.getInt("nombre_de_pages"),
+                rs.getBoolean("emprunter"),
+                rs.getBoolean("reservation"),
                 rs.getString("isbn"));
     }
 
@@ -151,6 +159,8 @@ public class DocumentDAOImpl implements DocumentDAO {
                 rs.getString("auteur"),
                 rs.getDate("date_publication").toLocalDate(),
                 rs.getInt("nombre_de_pages"),
+                rs.getBoolean("emprunter"),
+                rs.getBoolean("reservation"),
                 rs.getInt("numero"));
     }
 
@@ -161,6 +171,8 @@ public class DocumentDAOImpl implements DocumentDAO {
                 rs.getString("auteur"),
                 rs.getDate("date_publication").toLocalDate(),
                 rs.getInt("nombre_de_pages"),
+                rs.getBoolean("emprunter"),
+                rs.getBoolean("reservation"),
                 rs.getString("university"));
     }
 
@@ -171,6 +183,8 @@ public class DocumentDAOImpl implements DocumentDAO {
                 rs.getString("auteur"),
                 rs.getDate("date_publication").toLocalDate(),
                 rs.getInt("nombre_de_pages"),
+                rs.getBoolean("emprunter"),
+                rs.getBoolean("reservation"),
                 rs.getString("domaine_recherche"));
     }
 
@@ -271,6 +285,42 @@ public class DocumentDAOImpl implements DocumentDAO {
             }
         }
         return documents;
+    }
+
+    @Override
+    public void emprunter(String id) throws SQLException {
+        String sql = "UPDATE document SET emprunter = TRUE WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
+        }
+    }
+
+    @Override
+    public void retourner(String id) throws SQLException {
+        String sql = "UPDATE document SET emprunter = FALSE WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
+        }
+    }
+
+    @Override
+    public void reserver(String id) throws SQLException {
+        String sql = "UPDATE document SET reservation = TRUE WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
+        }
+    }
+
+    @Override
+    public void annulerReservation(String id) throws SQLException {
+        String sql = "UPDATE document SET reservation = FALSE WHERE id = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
+        }
     }
 
 }
