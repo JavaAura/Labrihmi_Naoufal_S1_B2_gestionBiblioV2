@@ -2,6 +2,7 @@ package utilitaire;
 
 import java.time.LocalDate;
 import java.util.Scanner;
+// import java.util.regex.Pattern;
 
 public class InputValidator {
 
@@ -42,16 +43,72 @@ public class InputValidator {
         return value;
     }
 
-    public boolean promptYesNo(String message) {
+    public String promptValidISBN(String message) {
         while (true) {
-            String response = promptString(message + " (y/n): ").toLowerCase();
-            if (response.equals("y")) {
-                return true;
-            } else if (response.equals("n")) {
-                return false;
-            } else {
-                System.out.println("Invalid input. Please enter 'y' or 'n'.");
+            String isbn = promptString(message);
+            if (isValidISBN(isbn)) {
+                return isbn;
             }
+            System.out.println("Invalid ISBN. Please try again.");
+        }
+    }
+
+    /*
+     * Valid ISBN-10 Examples:
+     * 0306406152
+     * 00074625420
+     * 0198526636
+     * 0140177395
+     * 0395067856
+     */
+
+    /*
+     * Valid ISBN-13 Examples:
+     * 9780306406157
+     * 9781402894626
+     * 9780198526636
+     * 9780140177398
+     * 9780395067850
+     */
+
+    private boolean isValidISBN(String isbn) {
+        return isValidISBN10(isbn) || isValidISBN13(isbn);
+    }
+
+    private boolean isValidISBN10(String isbn) {
+        if (isbn == null || isbn.length() != 10) {
+            return false;
+        }
+
+        try {
+            int sum = 0;
+            for (int i = 0; i < 9; i++) {
+                int digit = Integer.parseInt(String.valueOf(isbn.charAt(i)));
+                sum += (digit * (10 - i));
+            }
+            String checkSum = isbn.substring(9);
+            sum += "X".equals(checkSum) ? 10 : Integer.parseInt(checkSum);
+            return sum % 11 == 0;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean isValidISBN13(String isbn) {
+        if (isbn == null || isbn.length() != 13) {
+            return false;
+        }
+
+        try {
+            int sum = 0;
+            for (int i = 0; i < 12; i++) {
+                int digit = Integer.parseInt(String.valueOf(isbn.charAt(i)));
+                sum += (i % 2 == 0) ? digit : (digit * 3);
+            }
+            int checkDigit = Integer.parseInt(String.valueOf(isbn.charAt(12)));
+            return (checkDigit == (10 - (sum % 10)) % 10);
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }
