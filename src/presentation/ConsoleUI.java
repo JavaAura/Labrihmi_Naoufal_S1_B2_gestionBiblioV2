@@ -13,13 +13,17 @@ import essentiel.doc.Livre;
 import essentiel.doc.Magazine;
 import essentiel.doc.TheseUniversitaire;
 import utilitaire.DateUtils;
+import utilitaire.InputValidator;
 import essentiel.doc.JournalScientifique;
 
 public class ConsoleUI {
     private DocumentDAOImpl documentDAO;
+    private InputValidator inputValidator;
     private Scanner scanner;
 
     public ConsoleUI() {
+        this.scanner = new Scanner(System.in); // Initialize the Scanner object
+        this.inputValidator = new InputValidator(scanner); // Pass the Scanner to InputValidator
         try {
             Connection connection = DatabaseConnection.getInstance().getConnection();
             documentDAO = new DocumentDAOImpl(connection);
@@ -100,44 +104,12 @@ public class ConsoleUI {
         }
     }
 
-    private String promptString(String message) {
-        System.out.print(message);
-        return scanner.nextLine();
-    }
-
-    private LocalDate promptValidDate(String message, boolean allowEmpty) {
-        while (true) {
-            String dateStr = promptString(message);
-            if (allowEmpty && dateStr.isEmpty()) {
-                return null; // No date provided
-            }
-            LocalDate datePublication = DateUtils.parseDate(dateStr);
-            if (datePublication != null && DateUtils.isDateValid(datePublication)) {
-                return datePublication;
-            }
-            System.out.println("Invalid date. Please try again.");
-        }
-    }
-
-    private int promptInt(String message) {
-        System.out.print(message);
-        while (!scanner.hasNextInt()) {
-            System.out.println("Invalid input. Please enter a valid integer.");
-            scanner.next();
-            System.out.print(message);
-        }
-        int value = scanner.nextInt();
-        scanner.nextLine(); // Consume the newline character
-        return value;
-    }
-
     private void createDocument(String type) throws SQLException {
         String id = generateNextId(type);
-        String titre = promptString("Enter Title: ");
-        String auteur = promptString("Enter Author: ");
-        LocalDate datePublication = promptValidDate("Enter publication date (yyyy-MM-dd): ", false); // Ensure valid
-                                                                                                     // date
-        int nombreDePages = promptInt("Enter Number of Pages: ");
+        String titre = inputValidator.promptString("Enter Title: ");
+        String auteur = inputValidator.promptString("Enter Author: ");
+        LocalDate datePublication = inputValidator.promptValidDate("Enter publication date (yyyy-MM-dd): ", false);
+        int nombreDePages = inputValidator.promptInt("Enter Number of Pages: ");
         boolean emprunter = false;
         boolean reservation = false;
 
@@ -145,21 +117,21 @@ public class ConsoleUI {
 
         switch (type) {
             case "L":
-                String isbn = promptString("Enter ISBN: ");
+                String isbn = inputValidator.promptValidISBN("Enter ISBN: ");
                 document = new Livre(id, titre, auteur, datePublication, nombreDePages, emprunter, reservation, isbn);
                 break;
             case "M":
-                int numero = promptInt("Enter Issue Number: ");
+                int numero = inputValidator.promptInt("Enter Issue Number: ");
                 document = new Magazine(id, titre, auteur, datePublication, nombreDePages, emprunter, reservation,
                         numero);
                 break;
             case "T":
-                String university = promptString("Enter University: ");
+                String university = inputValidator.promptString("Enter University: ");
                 document = new TheseUniversitaire(id, titre, auteur, datePublication, nombreDePages, emprunter,
                         reservation, university);
                 break;
             case "J":
-                String domaineRecherche = promptString("Enter Research Domain: ");
+                String domaineRecherche = inputValidator.promptString("Enter Research Domain: ");
                 document = new JournalScientifique(id, titre, auteur, datePublication, nombreDePages, emprunter,
                         reservation, domaineRecherche);
                 break;
@@ -188,8 +160,6 @@ public class ConsoleUI {
     }
 
     private String generateNextId(String prefix) {
-        // Retrieve the next ID from the database or maintain a counter to generate new
-        // IDs
         int nextNumber = getNextDocumentNumber(prefix);
         return prefix + "-" + nextNumber;
     }
@@ -200,86 +170,91 @@ public class ConsoleUI {
     }
 
     private void readDocument() throws SQLException {
-        System.out.print("Enter Document ID to read: ");
-        String id = scanner.nextLine();
+        String id = inputValidator.promptString("Enter Document ID to read: ");
         Document document = documentDAO.read(id);
         if (document != null) {
-            System.out.println("Document Details:");
-            System.out.println("ID: " + document.getId());
-            System.out.println("Title: " + document.getTitre());
-            System.out.println("Author: " + document.getAuteur());
-            System.out.println("Publication Date: " + document.getDatePublication());
-            System.out.println("Number of Pages: " + document.getNombreDePages());
-            if (document instanceof Livre) {
-                System.out.println("ISBN: " + ((Livre) document).getIsbn());
-            } else if (document instanceof Magazine) {
-                System.out.println("Issue Number: " + ((Magazine) document).getNumero());
-            } else if (document instanceof TheseUniversitaire) {
-                System.out.println("University: " + ((TheseUniversitaire) document).getUniversity());
-            } else if (document instanceof JournalScientifique) {
-                System.out.println("Research Domain: " + ((JournalScientifique) document).getDomaineRecherche());
-            }
+            displayDocumentDetails(document);
         } else {
             System.out.println("Document not found.");
         }
     }
 
     private void updateDocument() throws SQLException {
-        System.out.print("Enter Document ID to update: ");
-        String id = scanner.nextLine();
+        String id = inputValidator.promptString("Enter Document ID to update: ");
         Document document = documentDAO.read(id);
         if (document != null) {
-            System.out.print("Enter new Title (leave empty to keep current): ");
-            String titre = scanner.nextLine();
-            if (!titre.isEmpty()) {
-                document.setTitre(titre);
-            }
-            System.out.print("Enter new Author (leave empty to keep current): ");
-            String auteur = scanner.nextLine();
-            if (!auteur.isEmpty()) {
-                document.setAuteur(auteur);
-            }
-            LocalDate newDatePublication = promptValidDate(
-                    "Enter new Publication Date (yyyy-MM-dd, leave empty to keep current): ", true);
-            if (newDatePublication != null) {
-                document.setDatePublication(newDatePublication);
-            }
-            System.out.print("Enter new Number of Pages (leave empty to keep current): ");
-            String nombreDePagesStr = scanner.nextLine();
-            if (!nombreDePagesStr.isEmpty()) {
-                int nombreDePages = Integer.parseInt(nombreDePagesStr);
-                document.setNombreDePages(nombreDePages);
-            }
-            if (document instanceof Livre) {
-                System.out.print("Enter new ISBN (leave empty to keep current): ");
-                String isbn = scanner.nextLine();
-                if (!isbn.isEmpty()) {
-                    ((Livre) document).setIsbn(isbn);
-                }
-            } else if (document instanceof Magazine) {
-                System.out.print("Enter new Issue Number (leave empty to keep current): ");
-                String numeroStr = scanner.nextLine();
-                if (!numeroStr.isEmpty()) {
-                    int numero = Integer.parseInt(numeroStr);
-                    ((Magazine) document).setNumero(numero);
-                }
-            } else if (document instanceof TheseUniversitaire) {
-                System.out.print("Enter new University (leave empty to keep current): ");
-                String university = scanner.nextLine();
-                if (!university.isEmpty()) {
-                    ((TheseUniversitaire) document).setUniversity(university);
-                }
-            } else if (document instanceof JournalScientifique) {
-                System.out.print("Enter new Research Domain (leave empty to keep current): ");
-                String domaineRecherche = scanner.nextLine();
-                if (!domaineRecherche.isEmpty()) {
-                    ((JournalScientifique) document).setDomaineRecherche(domaineRecherche);
-                }
-            }
+            updateDocumentFields(document);
             documentDAO.update(document);
             System.out.println("Document updated successfully.");
         } else {
             System.out.println("Document not found.");
+        }
+    }
+
+    private void displayDocumentDetails(Document document) {
+        System.out.println("Document Details:");
+        System.out.println("ID: " + document.getId());
+        System.out.println("Title: " + document.getTitre());
+        System.out.println("Author: " + document.getAuteur());
+        System.out.println("Publication Date: " + document.getDatePublication());
+        System.out.println("Number of Pages: " + document.getNombreDePages());
+        if (document instanceof Livre) {
+            System.out.println("ISBN: " + ((Livre) document).getIsbn());
+        } else if (document instanceof Magazine) {
+            System.out.println("Issue Number: " + ((Magazine) document).getNumero());
+        } else if (document instanceof TheseUniversitaire) {
+            System.out.println("University: " + ((TheseUniversitaire) document).getUniversity());
+        } else if (document instanceof JournalScientifique) {
+            System.out.println("Research Domain: " + ((JournalScientifique) document).getDomaineRecherche());
+        }
+    }
+
+    private void updateDocumentFields(Document document) {
+        String titre = inputValidator.promptString("Enter new Title (leave empty to keep current): ");
+        if (!titre.isEmpty()) {
+            document.setTitre(titre);
+        }
+
+        String auteur = inputValidator.promptString("Enter new Author (leave empty to keep current): ");
+        if (!auteur.isEmpty()) {
+            document.setAuteur(auteur);
+        }
+
+        LocalDate newDatePublication = inputValidator.promptValidDate(
+                "Enter new Publication Date (yyyy-MM-dd, leave empty to keep current): ", true);
+        if (newDatePublication != null) {
+            document.setDatePublication(newDatePublication);
+        }
+
+        String nombreDePagesStr = inputValidator
+                .promptString("Enter new Number of Pages (leave empty to keep current): ");
+        if (!nombreDePagesStr.isEmpty()) {
+            int nombreDePages = Integer.parseInt(nombreDePagesStr);
+            document.setNombreDePages(nombreDePages);
+        }
+
+        if (document instanceof Livre) {
+            String isbn = inputValidator.promptString("Enter new ISBN (leave empty to keep current): ");
+            if (!isbn.isEmpty()) {
+                ((Livre) document).setIsbn(isbn);
+            }
+        } else if (document instanceof Magazine) {
+            String numeroStr = inputValidator.promptString("Enter new Issue Number (leave empty to keep current): ");
+            if (!numeroStr.isEmpty()) {
+                int numero = Integer.parseInt(numeroStr);
+                ((Magazine) document).setNumero(numero);
+            }
+        } else if (document instanceof TheseUniversitaire) {
+            String university = inputValidator.promptString("Enter new University (leave empty to keep current): ");
+            if (!university.isEmpty()) {
+                ((TheseUniversitaire) document).setUniversity(university);
+            }
+        } else if (document instanceof JournalScientifique) {
+            String domaineRecherche = inputValidator
+                    .promptString("Enter new Research Domain (leave empty to keep current): ");
+            if (!domaineRecherche.isEmpty()) {
+                ((JournalScientifique) document).setDomaineRecherche(domaineRecherche);
+            }
         }
     }
 
