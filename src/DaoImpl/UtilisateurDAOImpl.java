@@ -6,7 +6,7 @@ import essentiel.Users.Etudiant;
 import essentiel.Users.Professeur;
 import essentiel.doc.Document;
 import essentiel.doc.TheseUniversitaire;
-
+import java.util.Optional;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +66,7 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
     }
 
     @Override
-    public Utilisateur read(String id) throws SQLException {
+    public Optional<Utilisateur> read(String id) throws SQLException {
         Utilisateur utilisateur = null;
 
         // First check in the etudiant table
@@ -103,7 +103,7 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
             }
         }
 
-        return utilisateur;
+        return Optional.ofNullable(utilisateur);
     }
 
     @Override
@@ -142,7 +142,10 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
     @Override
     public List<Utilisateur> findAll() throws SQLException {
         List<Utilisateur> utilisateurs = new ArrayList<>();
-        String sql = "SELECT u.id, u.name, u.email, u.age, e.CNE, p.CIN " +
+        String sql = "SELECT u.id, u.name, u.email, u.age, " +
+                "CASE WHEN e.CNE IS NOT NULL THEN 'Etudiant' " +
+                "WHEN p.CIN IS NOT NULL THEN 'Professeur' END AS userType, " +
+                "e.CNE, p.CIN " +
                 "FROM utilisateur u " +
                 "LEFT JOIN etudiant e ON u.id = e.id " +
                 "LEFT JOIN professeur p ON u.id = p.id";
@@ -155,20 +158,21 @@ public class UtilisateurDAOImpl implements UtilisateurDAO {
                 String name = rs.getString("name");
                 String email = rs.getString("email");
                 int age = rs.getInt("age");
-                String cne = rs.getString("CNE");
-                String cin = rs.getString("CIN");
+                String userType = rs.getString("userType");
 
-                Utilisateur utilisateur;
-                if (cne != null) { // If CNE is not null, it's an Etudiant
+                Utilisateur utilisateur = null;
+
+                if ("Etudiant".equals(userType)) { // It's an Etudiant
+                    String cne = rs.getString("CNE");
                     utilisateur = new Etudiant(id, name, email, age, cne);
-                } else if (cin != null) { // If CIN is not null, it's a Professeur
+                } else if ("Professeur".equals(userType)) { // It's a Professeur
+                    String cin = rs.getString("CIN");
                     utilisateur = new Professeur(id, name, email, age, cin);
-                } else {
-                    System.out.println("Unknown user type for ID: " + id);
-                    continue;
                 }
 
-                utilisateurs.add(utilisateur);
+                if (utilisateur != null) { // Only add valid users
+                    utilisateurs.add(utilisateur);
+                }
             }
         }
         return utilisateurs;

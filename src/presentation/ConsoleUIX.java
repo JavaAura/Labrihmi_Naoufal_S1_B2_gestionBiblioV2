@@ -8,8 +8,9 @@ import utilitaire.InputValidator;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ConsoleUIX {
     private UtilisateurDAOImpl utilisateurDAO;
@@ -17,11 +18,19 @@ public class ConsoleUIX {
     private Connection connection;
     private InputValidator inputValidator;
 
+    // Map for user creation logic to reduce redundancy
+    private final Map<Integer, Runnable> userCreationActions;
+
     public ConsoleUIX(Connection connection) {
         this.connection = connection;
         this.utilisateurDAO = new UtilisateurDAOImpl(connection);
         this.scanner = new Scanner(System.in);
-        this.inputValidator = new InputValidator(scanner); // Initialize InputValidator
+        this.inputValidator = new InputValidator(scanner);
+
+        // Initialize user creation actions map
+        this.userCreationActions = Map.of(
+                1, this::createEtudiant,
+                2, this::createProfesseur);
     }
 
     public void run() {
@@ -31,28 +40,17 @@ public class ConsoleUIX {
             displayMenu();
 
             int option = inputValidator.promptInt("Choose an option: ");
-
             switch (option) {
-                case 1:
-                    createUser();
-                    break;
-                case 2:
-                    readUser();
-                    break;
-                case 3:
-                    updateUser();
-                    break;
-                case 4:
-                    deleteUser();
-                    break;
-                case 5:
-                    listUsers();
-                    break;
-                case 6:
+                case 1 -> createUser();
+                case 2 -> readUser();
+                case 3 -> updateUser();
+                case 4 -> deleteUser();
+                case 5 -> listUsers();
+                case 6 -> {
                     System.out.println("Exiting...");
-                    return;
-                default:
-                    System.out.println("Invalid option. Please try again.");
+                    running = false;
+                }
+                default -> System.out.println("Invalid option. Please try again.");
             }
         }
 
@@ -69,51 +67,37 @@ public class ConsoleUIX {
     }
 
     private void createUser() {
-        System.out.println("Select user type:");
-        System.out.println("1. Etudiant");
-        System.out.println("2. Professeur");
-        int userType = inputValidator.promptInt("Enter choice: ");
-        scanner.nextLine(); // Consume newline
-
-        switch (userType) {
-            case 1:
-                createEtudiant();
-                break;
-            case 2:
-                createProfesseur();
-                break;
-            default:
-                System.out.println("Invalid user type. Please try again.");
-        }
+        int userType = inputValidator.promptInt("Select user type: \n1. Etudiant\n2. Professeur\nEnter choice: ");
+        Optional.ofNullable(userCreationActions.get(userType)).ifPresentOrElse(
+                Runnable::run,
+                () -> System.out.println("Invalid user type. Please try again."));
     }
 
     private void createEtudiant() {
-        String name = inputValidator.promptValidName("Enter name: ");
-        String email = inputValidator.promptValidEmail("Enter email: ");
-        int age = inputValidator.promptValidAge("Enter age: ");
-        String cne = inputValidator.promptValidCNE("Enter CNE: ");
-
-        try {
-            Etudiant etudiant = new Etudiant(null, name, email, age, cne); // ID will be generated
-            utilisateurDAO.create(etudiant); // Use DAO method
-            System.out.println("Etudiant created successfully.");
-        } catch (SQLException e) {
-            System.out.println("Error creating Etudiant: " + e.getMessage());
-        }
+        createUser((name, email, age) -> {
+            String cne = inputValidator.promptValidCNE("Enter CNE: ");
+            return new Etudiant(null, name, email, age, cne);
+        });
     }
 
     private void createProfesseur() {
+        createUser((name, email, age) -> {
+            String cin = inputValidator.promptValidCIN("Enter CIN: ");
+            return new Professeur(null, name, email, age, cin);
+        });
+    }
+
+    private void createUser(TriFunction<String, String, Integer, Utilisateur> userCreator) {
         String name = inputValidator.promptValidName("Enter name: ");
         String email = inputValidator.promptValidEmail("Enter email: ");
         int age = inputValidator.promptValidAge("Enter age: ");
-        String cin = inputValidator.promptValidCIN("Enter CIN: ");
 
         try {
-            Professeur professeur = new Professeur(null, name, email, age, cin); // ID will be generated
-            utilisateurDAO.create(professeur); // Use DAO method
-            System.out.println("Professeur created successfully.");
+            Utilisateur utilisateur = userCreator.apply(name, email, age);
+            utilisateurDAO.create(utilisateur);
+            System.out.println(utilisateur.getClass().getSimpleName() + " created successfully.");
         } catch (SQLException e) {
-            System.out.println("Error creating Professeur: " + e.getMessage());
+            System.out.println("Error creating user: " + e.getMessage());
         }
     }
 
@@ -125,15 +109,11 @@ public class ConsoleUIX {
             return;
         }
 
-        System.out.println("User for ID " + id + " is:");
-
         try {
-            Utilisateur utilisateur = utilisateurDAO.read(id);
-            if (utilisateur != null) {
-                System.out.println(utilisateur);
-            } else {
-                System.out.println("User not found.");
-            }
+            utilisateurDAO.read(id)
+                    .ifPresentOrElse(
+                            utilisateur -> System.out.println("User found: " + utilisateur),
+                            () -> System.out.println("User not found."));
         } catch (SQLException e) {
             System.out.println("Error reading user: " + e.getMessage());
         }
@@ -147,28 +127,25 @@ public class ConsoleUIX {
             return;
         }
 
-        String name = inputValidator.promptValidName("Enter new Name: ");
-        String email = inputValidator.promptValidEmail("Enter new Email: ");
-        int age = inputValidator.promptValidAge("Enter new Age: ");
-
         try {
-            Utilisateur utilisateur = utilisateurDAO.read(id);
-            if (utilisateur != null) {
-                if (utilisateur instanceof Etudiant) {
-                    String cne = inputValidator.promptValidCNE("Enter new CNE: ");
-                    utilisateur = new Etudiant(id, name, email, age, cne);
-                } else if (utilisateur instanceof Professeur) {
-                    String cin = inputValidator.promptValidCIN("Enter new CIN: ");
-                    utilisateur = new Professeur(id, name, email, age, cin);
-                }
+            utilisateurDAO.read(id).ifPresentOrElse(user -> {
+                String name = inputValidator.promptValidName("Enter new Name: ");
+                String email = inputValidator.promptValidEmail("Enter new Email: ");
+                int age = inputValidator.promptValidAge("Enter new Age: ");
 
-                utilisateurDAO.update(utilisateur);
-                System.out.println("User updated successfully.");
-            } else {
-                System.out.println("User not found.");
-            }
+                Utilisateur updatedUser = (user instanceof Etudiant)
+                        ? new Etudiant(id, name, email, age, inputValidator.promptValidCNE("Enter new CNE: "))
+                        : new Professeur(id, name, email, age, inputValidator.promptValidCIN("Enter new CIN: "));
+
+                try {
+                    utilisateurDAO.update(updatedUser);
+                    System.out.println("User updated successfully.");
+                } catch (SQLException e) {
+                    System.out.println("Error updating user: " + e.getMessage());
+                }
+            }, () -> System.out.println("User not found."));
         } catch (SQLException e) {
-            System.out.println("Error updating user: " + e.getMessage());
+            System.out.println("Error fetching user for update: " + e.getMessage());
         }
     }
 
@@ -191,11 +168,17 @@ public class ConsoleUIX {
     private void listUsers() {
         try {
             List<Utilisateur> utilisateurs = utilisateurDAO.findAll();
-            for (Utilisateur utilisateur : utilisateurs) {
-                System.out.println(utilisateur);
-            }
+            utilisateurs.stream()
+                    .map(Utilisateur::toString)
+                    .forEach(System.out::println); // Use stream to print all users
         } catch (SQLException e) {
             System.out.println("Error listing users: " + e.getMessage());
         }
     }
+}
+
+// TriFunction interface to handle creating users (Etudiant and Professeur)
+@FunctionalInterface
+interface TriFunction<T, U, V, R> {
+    R apply(T t, U u, V v);
 }

@@ -7,7 +7,7 @@ public class Livre extends Document {
 
     public Livre(String id, String titre, String auteur, LocalDate datePublication, int nombreDePages,
             boolean emprunter, boolean reservation, String isbn) {
-        super(id, titre, auteur, datePublication, nombreDePages, emprunter, emprunter);
+        super(id, titre, auteur, datePublication, nombreDePages, emprunter, reservation);
         this.isbn = isbn;
     }
 

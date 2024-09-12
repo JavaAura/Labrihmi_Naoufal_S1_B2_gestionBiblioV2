@@ -272,16 +272,35 @@ public class ConsoleUI {
         }
     }
 
+    // emp with right (prof)
     private void emprunterDocument() throws SQLException {
         System.out.print("Enter Document ID to borrow: ");
         String id = scanner.nextLine();
 
+        // Read the document from the database
         Document document = documentDAO.read(id);
 
         if (document != null) {
-            // Use the emprunter() method from Document class
-            document.emprunter();
-            documentDAO.emprunter(id); // Optionally update the database
+            // Prompt for user type
+            System.out.print("Enter user type (1 for Etudiant, 2 for Professeur): ");
+            int userType = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            // Check the type of the document and the type of the user
+            boolean canBorrow = true;
+            if (document instanceof TheseUniversitaire && userType == 1) {
+                System.out.println("Etudiants cannot borrow Thèses Universitaires.");
+                canBorrow = false;
+            }
+
+            if (canBorrow) {
+                // Use the emprunter() method from Document class
+                document.emprunter();
+                documentDAO.emprunter(id); // Optionally update the database
+                System.out.println("Document borrowed successfully.");
+            } else {
+                System.out.println("Unable to borrow the document.");
+            }
         } else {
             System.out.println("Document not found.");
         }

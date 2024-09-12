@@ -1,7 +1,7 @@
 package utilitaire;
 
-import utilitaire.DateUtils;
 import java.time.LocalDate;
+import utilitaire.DateUtils;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
