@@ -1,10 +1,17 @@
 package essentiel.Users;
 
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import DaoImpl.UtilisateurDAOImpl;
+
 public abstract class Utilisateur {
-    private String id;
-    private String name;
-    private String email;
-    private int age;
+    private static final Logger logger = Logger.getLogger(Utilisateur.class.getName());
+
+    protected String id;
+    protected String name;
+    protected String email;
+    protected int age;
 
     public Utilisateur(String id, String name, String email, int age) {
         this.id = id;
@@ -48,9 +55,24 @@ public abstract class Utilisateur {
 
     @Override
     public String toString() {
-        return String.format("ID: %s, Name: %s, Email: %s, Age: %d", id, name, email, age);
+        return formatUserDetails();
     }
 
-    // Abstract methods (if any)
+    // Abstract method for user type
     public abstract String getUserType();
+
+    // Utility methods
+
+    private String formatUserDetails() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("ID: %s, Name: %s, Email: %s, Age: %d", id, name, email, age));
+
+        if (this instanceof Etudiant) {
+            sb.append(", CNE: ").append(((Etudiant) this).getCne());
+        } else if (this instanceof Professeur) {
+            sb.append(", CIN: ").append(((Professeur) this).getCin());
+        }
+
+        return sb.toString();
+    }
 }
