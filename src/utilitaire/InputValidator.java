@@ -1,11 +1,17 @@
 package utilitaire;
 
 import java.time.LocalDate;
-import utilitaire.DateUtils;
 import java.util.Scanner;
-import java.util.regex.Pattern;
+import java.util.logging.Logger;
 
 public class InputValidator {
+
+    private static final Logger logger = Logger.getLogger(InputValidator.class.getName());
+    private static final String RESET = "\033[0m";
+    private static final String RED = "\033[0;31m";
+    private static final String GREEN = "\033[0;32m";
+    private static final String YELLOW = "\033[0;33m";
+    private static final String BLUE = "\033[0;34m";
 
     private Scanner scanner;
 
@@ -22,20 +28,23 @@ public class InputValidator {
         while (true) {
             String dateStr = promptString(message);
             if (allowEmpty && dateStr.isEmpty()) {
+                logger.info(GREEN + "No date provided, returning null." + RESET);
                 return null; // No date provided
             }
             LocalDate datePublication = DateUtils.parseDate(dateStr);
             if (datePublication != null && DateUtils.isDateValid(datePublication)) {
+                logger.info(GREEN + "Valid date provided: " + DateUtils.formatDate(datePublication) + RESET);
                 return datePublication;
             }
-            System.out.println("Invalid date. Please try again.");
+            logger.warning(RED + "Invalid date format or out of range. Prompting user again." + RESET);
+            System.out.println(RED + "Invalid date. Please try again." + RESET);
         }
     }
 
     public int promptInt(String message) {
         System.out.print(message);
         while (!scanner.hasNextInt()) {
-            System.out.println("Invalid input. Please enter a valid integer.");
+            System.out.println(RED + "Invalid input. Please enter a valid integer." + RESET);
             scanner.next();
             System.out.print(message);
         }
@@ -50,7 +59,7 @@ public class InputValidator {
             if (isValidEmail(email)) {
                 return email;
             }
-            System.out.println("Invalid email format. Please try again.");
+            System.out.println(RED + "Invalid email format. Please try again." + RESET);
         }
     }
 
@@ -60,7 +69,7 @@ public class InputValidator {
             if (isValidName(name)) {
                 return name;
             }
-            System.out.println("Invalid name. Please enter a name containing only letters and spaces.");
+            System.out.println(RED + "Invalid name. Please enter a name containing only letters and spaces." + RESET);
         }
     }
 
@@ -75,7 +84,7 @@ public class InputValidator {
             if (age > 0 && age < 120) {
                 return age;
             }
-            System.out.println("Invalid age. Please enter a valid age between 1 and 119.");
+            System.out.println(RED + "Invalid age. Please enter a valid age between 1 and 119." + RESET);
         }
     }
 
@@ -85,7 +94,7 @@ public class InputValidator {
             if (isValidCNE(cne)) {
                 return cne;
             }
-            System.out.println("Invalid CNE. Please try again.");
+            System.out.println(RED + "Invalid CNE. Please try again." + RESET);
         }
     }
 
@@ -95,26 +104,23 @@ public class InputValidator {
             if (isValidCIN(cin)) {
                 return cin;
             }
-            System.out.println("Invalid CIN. Please try again.");
+            System.out.println(RED + "Invalid CIN. Please try again." + RESET);
         }
     }
 
     private boolean isValidEmail(String email) {
         // Simple regex for validating email
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-        Pattern pattern = Pattern.compile(emailRegex);
-        return pattern.matcher(email).matches();
+        return email != null && email.matches(emailRegex);
     }
 
     private boolean isValidCNE(String cne) {
         // Implement validation logic for CNE if applicable
-        // This is a placeholder for demonstration purposes
         return cne != null && !cne.trim().isEmpty();
     }
 
     private boolean isValidCIN(String cin) {
         // Implement validation logic for CIN if applicable
-        // This is a placeholder for demonstration purposes
         return cin != null && !cin.trim().isEmpty();
     }
 
@@ -124,7 +130,7 @@ public class InputValidator {
             if (isValidISBN(isbn)) {
                 return isbn;
             }
-            System.out.println("Invalid ISBN. Please try again.");
+            System.out.println(RED + "Invalid ISBN. Please try again." + RESET);
         }
     }
 
