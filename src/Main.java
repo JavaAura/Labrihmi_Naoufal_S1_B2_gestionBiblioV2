@@ -18,8 +18,8 @@ public class Main {
 
             while (true) {
                 // Display menu to choose between ConsoleUI, ConsoleUIX, and ConsoleUIE
-                System.out.println("1. Run ConsoleUI");
-                System.out.println("2. Run ConsoleUIX");
+                System.out.println("1. Run Console of Document");
+                System.out.println("2. Run Console of Users");
                 System.out.println("3. Exit");
                 System.out.print("Choose an option: ");
 
