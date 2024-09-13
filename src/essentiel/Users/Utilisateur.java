@@ -1,12 +1,6 @@
 package essentiel.Users;
 
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import DaoImpl.UtilisateurDAOImpl;
-
 public abstract class Utilisateur {
-    private static final Logger logger = Logger.getLogger(Utilisateur.class.getName());
 
     protected String id;
     protected String name;

@@ -1,10 +1,9 @@
-import DB.DatabaseConnection;
-import presentation.ConsoleUI;
-import presentation.ConsoleUIX;
-
+import DataBase.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Scanner;
+import presentation.ConsoleUI;
+import presentation.ConsoleUIX;
 
 public class Main {
     public static void main(String[] args) {
@@ -26,23 +25,23 @@ public class Main {
                 int option = getUserInput(scanner);
 
                 switch (option) {
-                    case 1:
+                    case 1 -> {
                         // Run ConsoleUI
                         ConsoleUI consoleUI = new ConsoleUI();
                         consoleUI.run();
-                        break;
-                    case 2:
+                    }
+                    case 2 -> {
                         // Run ConsoleUIX
                         ConsoleUIX consoleUIX = new ConsoleUIX(connection);
                         consoleUIX.run();
-                        break;
-                    case 3:
+                    }
+                    case 3 -> {
                         // Exit the program
                         System.out.println("Exiting...");
                         scanner.close();
                         return;
-                    default:
-                        System.out.println("Invalid option. Please try again.");
+                    }
+                    default -> System.out.println("Invalid option. Please try again.");
                 }
             }
         } catch (SQLException e) {

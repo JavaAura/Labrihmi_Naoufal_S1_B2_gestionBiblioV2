@@ -1,22 +1,19 @@
 package presentation;
 
 import DaoImpl.UtilisateurDAOImpl;
-import essentiel.Users.Utilisateur;
 import essentiel.Users.Etudiant;
 import essentiel.Users.Professeur;
-import utilitaire.InputValidator;
-
+import essentiel.Users.Utilisateur;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import utilitaire.InputValidator;
 
 public class ConsoleUIX {
-    private UtilisateurDAOImpl utilisateurDAO;
-    private Scanner scanner;
+    private final UtilisateurDAOImpl utilisateurDAO;
+    private final Scanner scanner;
     private Connection connection;
-    private InputValidator inputValidator;
+    private final InputValidator inputValidator;
 
     // ANSI color codes for console output
     private static final String ANSI_RESET = "\u001B[0m";
@@ -173,7 +170,9 @@ public class ConsoleUIX {
 
     private void listUsers() {
         try {
+            //Collection
             List<Utilisateur> utilisateurs = utilisateurDAO.findAll();
+            // process this list using a stream to print all users
             utilisateurs.stream()
                     .map(Utilisateur::toString)
                     .forEach(user -> System.out.println(ANSI_GREEN + user + ANSI_RESET)); // Use stream to print all

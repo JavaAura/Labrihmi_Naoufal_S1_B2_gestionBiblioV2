@@ -1,12 +1,11 @@
 package presentation;
 
+import DataBase.*;
+import essentiel.Bibliotheque;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Scanner;
-
-import DB.DatabaseConnection;
-import essentiel.Bibliotheque;
-import utilitaire.InputValidator;
+import utilitaire.*;
 
 public class ConsoleUI {
     private Bibliotheque bibliotheque;
@@ -36,17 +35,13 @@ public class ConsoleUI {
 
             try {
                 switch (mainChoice) {
-                    case 1:
-                        handleDocumentOperations();
-                        break;
-                    case 2:
-                        handleBorrowingReturningOperations();
-                        break;
-                    case 3:
+                    case 1 -> handleDocumentOperations();
+                    case 2 -> handleBorrowingReturningOperations();
+                    case 3 -> {
                         System.out.println("Exiting...");
                         return;
-                    default:
-                        System.out.println("Invalid choice, please try again.");
+                    }
+                    default -> System.out.println("Invalid choice, please try again.");
                 }
             } catch (SQLException e) {
                 System.err.println("Database error: " + e.getMessage());
@@ -67,25 +62,15 @@ public class ConsoleUI {
             int documentChoice = getValidInteger();
 
             switch (documentChoice) {
-                case 1:
-                    handleCreateDocument();
-                    break;
-                case 2:
-                    bibliotheque.readDocument();
-                    break;
-                case 3:
-                    bibliotheque.updateDocument();
-                    break;
-                case 4:
-                    bibliotheque.deleteDocument();
-                    break;
-                case 5:
-                    bibliotheque.findAllDocuments();
-                    break;
-                case 6:
+                case 1 -> handleCreateDocument();
+                case 2 -> bibliotheque.readDocument();
+                case 3 -> bibliotheque.updateDocument();
+                case 4 -> bibliotheque.deleteDocument();
+                case 5 -> bibliotheque.findAllDocuments();
+                case 6 -> {
                     return; // Return to main menu
-                default:
-                    System.out.println("Invalid choice, please try again.");
+                }
+                default -> System.out.println("Invalid choice, please try again.");
             }
         }
     }
@@ -102,22 +87,14 @@ public class ConsoleUI {
             int createChoice = getValidInteger();
 
             switch (createChoice) {
-                case 1:
-                    bibliotheque.createLivre();
-                    break;
-                case 2:
-                    bibliotheque.createMagazine();
-                    break;
-                case 3:
-                    bibliotheque.createTheseUniversitaire();
-                    break;
-                case 4:
-                    bibliotheque.createJournalScientifique();
-                    break;
-                case 5:
+                case 1 -> bibliotheque.createLivre();
+                case 2 -> bibliotheque.createMagazine();
+                case 3 -> bibliotheque.createTheseUniversitaire();
+                case 4 -> bibliotheque.createJournalScientifique();
+                case 5 -> {
                     return; // Return to document operations menu
-                default:
-                    System.out.println("Invalid choice, please try again.");
+                }
+                default -> System.out.println("Invalid choice, please try again.");
             }
         }
     }
@@ -134,22 +111,14 @@ public class ConsoleUI {
             int borrowReturnChoice = getValidInteger();
 
             switch (borrowReturnChoice) {
-                case 1:
-                    bibliotheque.emprunterDocument();
-                    break;
-                case 2:
-                    bibliotheque.returneDocument();
-                    break;
-                case 3:
-                    bibliotheque.reserverDocument();
-                    break;
-                case 4:
-                    bibliotheque.annuleReserverDocument();
-                    break;
-                case 5:
+                case 1 -> bibliotheque.emprunterDocument();
+                case 2 -> bibliotheque.returneDocument();
+                case 3 -> bibliotheque.reserverDocument();
+                case 4 -> bibliotheque.annuleReserverDocument();
+                case 5 -> {
                     return; // Return to main menu
-                default:
-                    System.out.println("Invalid choice, please try again.");
+                }
+                default -> System.out.println("Invalid choice, please try again.");
             }
         }
     }
