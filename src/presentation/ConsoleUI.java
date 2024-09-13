@@ -32,8 +32,7 @@ public class ConsoleUI {
             System.out.println("2. Borrowing/Returning Operations");
             System.out.println("3. Exit");
 
-            int mainChoice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            int mainChoice = getValidInteger();
 
             try {
                 switch (mainChoice) {
@@ -56,90 +55,110 @@ public class ConsoleUI {
     }
 
     private void handleDocumentOperations() throws SQLException {
-        System.out.println("Document Operations:");
-        System.out.println("1. Create Document");
-        System.out.println("2. Read Document");
-        System.out.println("3. Update Document");
-        System.out.println("4. Delete Document");
-        System.out.println("5. List All Documents");
+        while (true) {
+            System.out.println("Document Operations:");
+            System.out.println("1. Create Document");
+            System.out.println("2. Read Document");
+            System.out.println("3. Update Document");
+            System.out.println("4. Delete Document");
+            System.out.println("5. List All Documents");
+            System.out.println("6. Return to Main Menu");
 
-        int documentChoice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+            int documentChoice = getValidInteger();
 
-        switch (documentChoice) {
-            case 1:
-                handleCreateDocument();
-                break;
-            case 2:
-                bibliotheque.readDocument();
-                break;
-            case 3:
-                bibliotheque.updateDocument();
-                break;
-            case 4:
-                bibliotheque.deleteDocument();
-                break;
-            case 5:
-                bibliotheque.findAllDocuments();
-                break;
-            default:
-                System.out.println("Invalid choice, please try again.");
+            switch (documentChoice) {
+                case 1:
+                    handleCreateDocument();
+                    break;
+                case 2:
+                    bibliotheque.readDocument();
+                    break;
+                case 3:
+                    bibliotheque.updateDocument();
+                    break;
+                case 4:
+                    bibliotheque.deleteDocument();
+                    break;
+                case 5:
+                    bibliotheque.findAllDocuments();
+                    break;
+                case 6:
+                    return; // Return to main menu
+                default:
+                    System.out.println("Invalid choice, please try again.");
+            }
         }
     }
 
     private void handleCreateDocument() throws SQLException {
-        System.out.println("Create Document:");
-        System.out.println("1. Create Livre");
-        System.out.println("2. Create Magazine");
-        System.out.println("3. Create TheseUniversitaire");
-        System.out.println("4. Create JournalScientifique");
+        while (true) {
+            System.out.println("Create Document:");
+            System.out.println("1. Create Livre");
+            System.out.println("2. Create Magazine");
+            System.out.println("3. Create TheseUniversitaire");
+            System.out.println("4. Create JournalScientifique");
+            System.out.println("5. Return to Document Operations Menu");
 
-        int createChoice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+            int createChoice = getValidInteger();
 
-        switch (createChoice) {
-            case 1:
-                bibliotheque.createLivre();
-                break;
-            case 2:
-                bibliotheque.createMagazine();
-                break;
-            case 3:
-                bibliotheque.createTheseUniversitaire();
-                break;
-            case 4:
-                bibliotheque.createJournalScientifique();
-                break;
-            default:
-                System.out.println("Invalid choice, please try again.");
+            switch (createChoice) {
+                case 1:
+                    bibliotheque.createLivre();
+                    break;
+                case 2:
+                    bibliotheque.createMagazine();
+                    break;
+                case 3:
+                    bibliotheque.createTheseUniversitaire();
+                    break;
+                case 4:
+                    bibliotheque.createJournalScientifique();
+                    break;
+                case 5:
+                    return; // Return to document operations menu
+                default:
+                    System.out.println("Invalid choice, please try again.");
+            }
         }
     }
 
     private void handleBorrowingReturningOperations() throws SQLException {
-        System.out.println("Borrowing/Returning Operations:");
-        System.out.println("1. Borrow Document");
-        System.out.println("2. Return Document");
-        System.out.println("3. Reserve Document");
-        System.out.println("4. Cancel Reservation");
+        while (true) {
+            System.out.println("Borrowing/Returning Operations:");
+            System.out.println("1. Borrow Document");
+            System.out.println("2. Return Document");
+            System.out.println("3. Reserve Document");
+            System.out.println("4. Cancel Reservation");
+            System.out.println("5. Return to Main Menu");
 
-        int borrowReturnChoice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+            int borrowReturnChoice = getValidInteger();
 
-        switch (borrowReturnChoice) {
-            case 1:
-                bibliotheque.emprunterDocument();
-                break;
-            case 2:
-                bibliotheque.returneDocument();
-                break;
-            case 3:
-                bibliotheque.reserverDocument();
-                break;
-            case 4:
-                bibliotheque.annuleReserverDocument();
-                break;
-            default:
-                System.out.println("Invalid choice, please try again.");
+            switch (borrowReturnChoice) {
+                case 1:
+                    bibliotheque.emprunterDocument();
+                    break;
+                case 2:
+                    bibliotheque.returneDocument();
+                    break;
+                case 3:
+                    bibliotheque.reserverDocument();
+                    break;
+                case 4:
+                    bibliotheque.annuleReserverDocument();
+                    break;
+                case 5:
+                    return; // Return to main menu
+                default:
+                    System.out.println("Invalid choice, please try again.");
+            }
         }
+    }
+
+    private int getValidInteger() {
+        while (!scanner.hasNextInt()) {
+            System.out.println("Invalid input. Please enter a number.");
+            scanner.next(); // Consume the invalid input
+        }
+        return scanner.nextInt();
     }
 }
