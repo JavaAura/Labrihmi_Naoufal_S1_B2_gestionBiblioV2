@@ -18,6 +18,11 @@ public class ConsoleUIX {
     private Connection connection;
     private InputValidator inputValidator;
 
+    // ANSI color codes for console output
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_GREEN = "\u001B[32m";
+    private static final String ANSI_RED = "\u001B[31m";
+
     // Map for user creation logic to reduce redundancy
     private final Map<Integer, Runnable> userCreationActions;
 
@@ -50,11 +55,11 @@ public class ConsoleUIX {
                     System.out.println("Exiting...");
                     running = false;
                 }
-                default -> System.out.println("Invalid option. Please try again.");
+                default -> System.out.println(ANSI_RED + "Invalid option. Please try again." + ANSI_RESET);
             }
         }
 
-        scanner.close(); // Close scanner resource
+        // scanner.close(); // Close scanner resource
     }
 
     private void displayMenu() {
@@ -70,7 +75,7 @@ public class ConsoleUIX {
         int userType = inputValidator.promptInt("Select user type: \n1. Etudiant\n2. Professeur\nEnter choice: ");
         Optional.ofNullable(userCreationActions.get(userType)).ifPresentOrElse(
                 Runnable::run,
-                () -> System.out.println("Invalid user type. Please try again."));
+                () -> System.out.println(ANSI_RED + "Invalid user type. Please try again." + ANSI_RESET));
     }
 
     private void createEtudiant() {
@@ -95,9 +100,10 @@ public class ConsoleUIX {
         try {
             Utilisateur utilisateur = userCreator.apply(name, email, age);
             utilisateurDAO.create(utilisateur);
-            System.out.println(utilisateur.getClass().getSimpleName() + " created successfully.");
+            System.out.println(
+                    ANSI_GREEN + utilisateur.getClass().getSimpleName() + " created successfully." + ANSI_RESET);
         } catch (SQLException e) {
-            System.out.println("Error creating user: " + e.getMessage());
+            System.out.println(ANSI_RED + "Error creating user: " + e.getMessage() + ANSI_RESET);
         }
     }
 
@@ -105,17 +111,17 @@ public class ConsoleUIX {
         String id = inputValidator.promptString("Enter user ID to read: ").trim();
 
         if (id.isEmpty()) {
-            System.out.println("Error: ID is empty. Please enter a valid ID.");
+            System.out.println(ANSI_RED + "Error: ID is empty. Please enter a valid ID." + ANSI_RESET);
             return;
         }
 
         try {
             utilisateurDAO.read(id)
                     .ifPresentOrElse(
-                            utilisateur -> System.out.println("User found: " + utilisateur),
-                            () -> System.out.println("User not found."));
+                            utilisateur -> System.out.println(ANSI_GREEN + "User found: " + utilisateur + ANSI_RESET),
+                            () -> System.out.println(ANSI_RED + "User not found." + ANSI_RESET));
         } catch (SQLException e) {
-            System.out.println("Error reading user: " + e.getMessage());
+            System.out.println(ANSI_RED + "Error reading user: " + e.getMessage() + ANSI_RESET);
         }
     }
 
@@ -123,7 +129,7 @@ public class ConsoleUIX {
         String id = inputValidator.promptString("Enter user ID to update: ").trim();
 
         if (id.isEmpty()) {
-            System.out.println("Error: ID is empty. Please enter a valid ID.");
+            System.out.println(ANSI_RED + "Error: ID is empty. Please enter a valid ID." + ANSI_RESET);
             return;
         }
 
@@ -139,13 +145,13 @@ public class ConsoleUIX {
 
                 try {
                     utilisateurDAO.update(updatedUser);
-                    System.out.println("User updated successfully.");
+                    System.out.println(ANSI_GREEN + "User updated successfully." + ANSI_RESET);
                 } catch (SQLException e) {
-                    System.out.println("Error updating user: " + e.getMessage());
+                    System.out.println(ANSI_RED + "Error updating user: " + e.getMessage() + ANSI_RESET);
                 }
-            }, () -> System.out.println("User not found."));
+            }, () -> System.out.println(ANSI_RED + "User not found." + ANSI_RESET));
         } catch (SQLException e) {
-            System.out.println("Error fetching user for update: " + e.getMessage());
+            System.out.println(ANSI_RED + "Error fetching user for update: " + e.getMessage() + ANSI_RESET);
         }
     }
 
@@ -153,15 +159,15 @@ public class ConsoleUIX {
         String id = inputValidator.promptString("Enter user ID to delete: ").trim();
 
         if (id.isEmpty()) {
-            System.out.println("Error: ID is empty. Please enter a valid ID.");
+            System.out.println(ANSI_RED + "Error: ID is empty. Please enter a valid ID." + ANSI_RESET);
             return;
         }
 
         try {
             utilisateurDAO.delete(id);
-            System.out.println("User deleted successfully.");
+            System.out.println(ANSI_GREEN + "User deleted successfully." + ANSI_RESET);
         } catch (SQLException e) {
-            System.out.println("Error deleting user: " + e.getMessage());
+            System.out.println(ANSI_RED + "Error deleting user: " + e.getMessage() + ANSI_RESET);
         }
     }
 
@@ -170,15 +176,16 @@ public class ConsoleUIX {
             List<Utilisateur> utilisateurs = utilisateurDAO.findAll();
             utilisateurs.stream()
                     .map(Utilisateur::toString)
-                    .forEach(System.out::println); // Use stream to print all users
+                    .forEach(user -> System.out.println(ANSI_GREEN + user + ANSI_RESET)); // Use stream to print all
+                                                                                          // users
         } catch (SQLException e) {
-            System.out.println("Error listing users: " + e.getMessage());
+            System.out.println(ANSI_RED + "Error listing users: " + e.getMessage() + ANSI_RESET);
         }
     }
-}
 
-// TriFunction interface to handle creating users (Etudiant and Professeur)
-@FunctionalInterface
-interface TriFunction<T, U, V, R> {
-    R apply(T t, U u, V v);
+    // TriFunction interface to handle creating users (Etudiant and Professeur)
+    @FunctionalInterface
+    interface TriFunction<T, U, V, R> {
+        R apply(T t, U u, V v);
+    }
 }
