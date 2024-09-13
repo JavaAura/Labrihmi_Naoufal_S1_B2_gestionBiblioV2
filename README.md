@@ -38,9 +38,9 @@ This project is a library management system designed to manage documents and use
 
    -Compile the Java source files using the following command. Make sure to replace path/to/postgresql.jar with the actual path to the PostgreSQL JDBC driver JAR file:
 
-  ```javac -d bin -cp "path/to/postgresql.jar" src/**/*.java```
+           ``` javac -d bin -cp "path/to/postgresql.jar" src/**/*.java ```
 
 4. **Run the Application:**
    Run the Application: Execute the compiled Java application using the following command. Replace path/to/postgresql.jar with the actual path to the PostgreSQL JDBC driver JAR file:
-     ```java -cp "bin:path/to/postgresql.jar" presentation.ConsoleUIX ```
+           ```java -cp "bin:path/to/postgresql.jar" presentation.ConsoleUIX ```
  
