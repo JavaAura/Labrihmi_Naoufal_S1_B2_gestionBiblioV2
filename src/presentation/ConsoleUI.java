@@ -3,6 +3,7 @@ package presentation;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Scanner;
+
 import DB.DatabaseConnection;
 import essentiel.Bibliotheque;
 import utilitaire.InputValidator;
@@ -27,62 +28,22 @@ public class ConsoleUI {
     public void run() {
         while (true) {
             System.out.println("Choose an option:");
-            System.out.println("1. Create Livre");
-            System.out.println("2. Create Magazine");
-            System.out.println("3. Create TheseUniversitaire");
-            System.out.println("4. Create JournalScientifique");
-            System.out.println("5. Read Document");
-            System.out.println("6. Update Document");
-            System.out.println("7. Delete Document");
-            System.out.println("8. List All Documents");
-            System.out.println("9. Borrow Document");
-            System.out.println("10. Return Document");
-            System.out.println("11. Reserve Document");
-            System.out.println("12. Cancel Reservation");
-            System.out.println("13. Exit");
+            System.out.println("1. Document Operations");
+            System.out.println("2. Borrowing/Returning Operations");
+            System.out.println("3. Exit");
 
-            int choice = scanner.nextInt();
+            int mainChoice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
             try {
-                switch (choice) {
+                switch (mainChoice) {
                     case 1:
-                        bibliotheque.createLivre();
+                        handleDocumentOperations();
                         break;
                     case 2:
-                        bibliotheque.createMagazine();
+                        handleBorrowingReturningOperations();
                         break;
                     case 3:
-                        bibliotheque.createTheseUniversitaire();
-                        break;
-                    case 4:
-                        bibliotheque.createJournalScientifique();
-                        break;
-                    case 5:
-                        bibliotheque.readDocument();
-                        break;
-                    case 6:
-                        bibliotheque.updateDocument();
-                        break;
-                    case 7:
-                        bibliotheque.deleteDocument();
-                        break;
-                    case 8:
-                        bibliotheque.findAllDocuments();
-                        break;
-                    case 9:
-                        bibliotheque.emprunterDocument();
-                        break;
-                    case 10:
-                        bibliotheque.returneDocument();
-                        break;
-                    case 11:
-                        bibliotheque.reserverDocument();
-                        break;
-                    case 12:
-                        bibliotheque.annuleReserverDocument();
-                        break;
-                    case 13:
                         System.out.println("Exiting...");
                         return;
                     default:
@@ -91,6 +52,94 @@ public class ConsoleUI {
             } catch (SQLException e) {
                 System.err.println("Database error: " + e.getMessage());
             }
+        }
+    }
+
+    private void handleDocumentOperations() throws SQLException {
+        System.out.println("Document Operations:");
+        System.out.println("1. Create Document");
+        System.out.println("2. Read Document");
+        System.out.println("3. Update Document");
+        System.out.println("4. Delete Document");
+        System.out.println("5. List All Documents");
+
+        int documentChoice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        switch (documentChoice) {
+            case 1:
+                handleCreateDocument();
+                break;
+            case 2:
+                bibliotheque.readDocument();
+                break;
+            case 3:
+                bibliotheque.updateDocument();
+                break;
+            case 4:
+                bibliotheque.deleteDocument();
+                break;
+            case 5:
+                bibliotheque.findAllDocuments();
+                break;
+            default:
+                System.out.println("Invalid choice, please try again.");
+        }
+    }
+
+    private void handleCreateDocument() throws SQLException {
+        System.out.println("Create Document:");
+        System.out.println("1. Create Livre");
+        System.out.println("2. Create Magazine");
+        System.out.println("3. Create TheseUniversitaire");
+        System.out.println("4. Create JournalScientifique");
+
+        int createChoice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        switch (createChoice) {
+            case 1:
+                bibliotheque.createLivre();
+                break;
+            case 2:
+                bibliotheque.createMagazine();
+                break;
+            case 3:
+                bibliotheque.createTheseUniversitaire();
+                break;
+            case 4:
+                bibliotheque.createJournalScientifique();
+                break;
+            default:
+                System.out.println("Invalid choice, please try again.");
+        }
+    }
+
+    private void handleBorrowingReturningOperations() throws SQLException {
+        System.out.println("Borrowing/Returning Operations:");
+        System.out.println("1. Borrow Document");
+        System.out.println("2. Return Document");
+        System.out.println("3. Reserve Document");
+        System.out.println("4. Cancel Reservation");
+
+        int borrowReturnChoice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        switch (borrowReturnChoice) {
+            case 1:
+                bibliotheque.emprunterDocument();
+                break;
+            case 2:
+                bibliotheque.returneDocument();
+                break;
+            case 3:
+                bibliotheque.reserverDocument();
+                break;
+            case 4:
+                bibliotheque.annuleReserverDocument();
+                break;
+            default:
+                System.out.println("Invalid choice, please try again.");
         }
     }
 }

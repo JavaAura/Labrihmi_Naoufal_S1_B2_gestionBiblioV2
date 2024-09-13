@@ -13,6 +13,7 @@ import essentiel.doc.Magazine;
 import essentiel.doc.TheseUniversitaire;
 import essentiel.doc.JournalScientifique;
 import utilitaire.InputValidator;
+import utilitaire.Logger;
 
 public class Bibliotheque {
     private DocumentDAOImpl documentDAO;
@@ -76,7 +77,7 @@ public class Bibliotheque {
         }
 
         documentDAO.create(document);
-        System.out.println(type + " created successfully.");
+        Logger.info(type + " created successfully.");
     }
 
     private String generateNextId(String prefix) {
@@ -95,25 +96,25 @@ public class Bibliotheque {
         if (document != null) {
             displayDocumentDetails(document);
         } else {
-            System.out.println("Document not found.");
+            Logger.error("Document not found.");
         }
     }
 
     private void displayDocumentDetails(Document document) {
-        System.out.println("Document Details:");
-        System.out.println("ID: " + document.getId());
-        System.out.println("Title: " + document.getTitre());
-        System.out.println("Author: " + document.getAuteur());
-        System.out.println("Publication Date: " + document.getDatePublication());
-        System.out.println("Number of Pages: " + document.getNombreDePages());
+        Logger.info("Document Details:");
+        Logger.info("ID: " + document.getId());
+        Logger.info("Title: " + document.getTitre());
+        Logger.info("Author: " + document.getAuteur());
+        Logger.info("Publication Date: " + document.getDatePublication());
+        Logger.info("Number of Pages: " + document.getNombreDePages());
         if (document instanceof Livre) {
-            System.out.println("ISBN: " + ((Livre) document).getIsbn());
+            Logger.info("ISBN: " + ((Livre) document).getIsbn());
         } else if (document instanceof Magazine) {
-            System.out.println("Issue Number: " + ((Magazine) document).getNumero());
+            Logger.info("Issue Number: " + ((Magazine) document).getNumero());
         } else if (document instanceof TheseUniversitaire) {
-            System.out.println("University: " + ((TheseUniversitaire) document).getUniversity());
+            Logger.info("University: " + ((TheseUniversitaire) document).getUniversity());
         } else if (document instanceof JournalScientifique) {
-            System.out.println("Research Domain: " + ((JournalScientifique) document).getDomaineRecherche());
+            Logger.info("Research Domain: " + ((JournalScientifique) document).getDomaineRecherche());
         }
     }
 
@@ -123,9 +124,9 @@ public class Bibliotheque {
         if (document != null) {
             updateDocumentFields(document);
             documentDAO.update(document);
-            System.out.println("Document updated successfully.");
+            Logger.info("Document updated successfully.");
         } else {
-            System.out.println("Document not found.");
+            Logger.error("Document not found.");
         }
     }
 
@@ -181,48 +182,85 @@ public class Bibliotheque {
     public void deleteDocument() throws SQLException {
         String id = inputValidator.promptString("Enter Document ID to delete: ");
         documentDAO.delete(id);
-        System.out.println("Document deleted successfully.");
+        Logger.info("Document deleted successfully.");
     }
 
     public void findAllDocuments() throws SQLException {
         List<Document> documents = documentDAO.findAll();
+        if (documents.isEmpty()) {
+            Logger.info("No documents found.");
+            return;
+        }
+
+        Logger.info("Listing all documents:\n");
         for (Document doc : documents) {
-            System.out.println(doc.toString());
+            Logger.info("Document ID: " + doc.getId());
+            Logger.info("Title: " + doc.getTitre());
+            Logger.info("Author: " + doc.getAuteur());
+            Logger.info("Publication Date: " + doc.getDatePublication());
+            Logger.info("Number of Pages: " + doc.getNombreDePages());
+
+            if (doc instanceof Livre) {
+                Livre livre = (Livre) doc;
+                Logger.info("ISBN: " + livre.getIsbn());
+            } else if (doc instanceof Magazine) {
+                Magazine magazine = (Magazine) doc;
+                Logger.info("Issue Number: " + magazine.getNumero());
+            } else if (doc instanceof TheseUniversitaire) {
+                TheseUniversitaire these = (TheseUniversitaire) doc;
+                Logger.info("University: " + these.getUniversity());
+            } else if (doc instanceof JournalScientifique) {
+                JournalScientifique journal = (JournalScientifique) doc;
+                Logger.info("Research Domain: " + journal.getDomaineRecherche());
+            }
+
+            Logger.info("Borrowed: " + (doc.isEmprunter() ? "Yes" : "No"));
+            Logger.info("Reserved: " + (doc.isReservation() ? "Yes" : "No"));
+            Logger.info("----------------------------------------");
         }
     }
 
-    // emp with right (prof)
     public void emprunterDocument() throws SQLException {
-
         System.out.print("Enter Document ID to borrow: ");
         String id = scanner.nextLine();
 
-        // Read the document from the database
         Document document = documentDAO.read(id);
 
         if (document != null) {
-            // Prompt for user type
             System.out.print("Enter user type (1 for Etudiant, 2 for Professeur): ");
             int userType = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
-            // Check the type of the document and the type of the user
             boolean canBorrow = true;
             if (document instanceof TheseUniversitaire && userType == 1) {
-                System.out.println("Etudiants cannot borrow Thèses Universitaires.");
+                Logger.warning("Etudiants cannot borrow Thèses Universitaires.");
                 canBorrow = false;
             }
 
             if (canBorrow) {
-                // Use the emprunter() method from Document class
                 document.emprunter();
-                documentDAO.emprunter(id); // Optionally update the database
-                System.out.println("Document borrowed successfully.");
+                documentDAO.emprunter(id);
+                Logger.info("Document borrowed successfully.");
             } else {
-                System.out.println("Unable to borrow the document.");
+                Logger.warning("User type not authorized to borrow this document.");
             }
         } else {
-            System.out.println("Document not found.");
+            Logger.error("Document not found.");
+        }
+    }
+
+    public void retournerDocument() throws SQLException {
+        System.out.print("Enter Document ID to return: ");
+        String id = scanner.nextLine();
+
+        Document document = documentDAO.read(id);
+
+        if (document != null) {
+            document.retourner();
+            documentDAO.retourner(id);
+            Logger.info("Document returned successfully.");
+        } else {
+            Logger.error("Document not found.");
         }
     }
 
@@ -233,11 +271,11 @@ public class Bibliotheque {
         Document document = documentDAO.read(id);
 
         if (document != null) {
-            document.reserver(); // Call reserver() method from Document class
-            documentDAO.reserver(id); // Update the reservation status in the
-                                      // database if needed
+            document.reserver();
+            documentDAO.reserver(id);
+            Logger.info("Document reserved successfully.");
         } else {
-            System.out.println("Document not found.");
+            Logger.error("Document not found.");
         }
     }
 
@@ -248,10 +286,11 @@ public class Bibliotheque {
         Document document = documentDAO.read(id);
 
         if (document != null) {
-            document.annulerReservation(); // Call annulerReservation() method from Document class
-            documentDAO.annulerReservation(id); // Update the reservation status in the database
+            document.annulerReservation();
+            documentDAO.annulerReservation(id);
+            Logger.info("Reservation canceled successfully.");
         } else {
-            System.out.println("Document not found.");
+            Logger.error("Document not found.");
         }
     }
 
@@ -264,8 +303,9 @@ public class Bibliotheque {
         if (document != null) {
             document.retourner(); // Call retourner() method from Document class
             documentDAO.retourner(id); // Update the borrowing status in the database
+            Logger.info("Document returned successfully: " + id);
         } else {
-            System.out.println("Document not found.");
+            Logger.error("Document not found: " + id);
         }
     }
 
