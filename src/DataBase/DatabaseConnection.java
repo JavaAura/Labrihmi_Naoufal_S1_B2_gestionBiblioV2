@@ -2,7 +2,9 @@ package DataBase;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DatabaseConnection {
     private static DatabaseConnection instance;
@@ -37,5 +39,21 @@ public class DatabaseConnection {
 
     public Connection getConnection() {
         return connection;
+    }
+
+    public void executeQuery(String query) {
+        // Utilisation du try-with-resources pour garantir que Statement et ResultSet seront fermés
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            // Traitement des résultats de la requête
+            while (rs.next()) {
+                System.out.println("Résultat : " + rs.getString(1));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

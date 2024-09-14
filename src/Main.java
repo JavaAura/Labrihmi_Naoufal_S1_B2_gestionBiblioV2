@@ -7,16 +7,17 @@ import presentation.ConsoleUIX;
 
 public class Main {
     public static void main(String[] args) {
-        try {
-            // Get the singleton instance of DatabaseConnection
-            DatabaseConnection dbConnection = DatabaseConnection.getInstance();
-            Connection connection = dbConnection.getConnection();
+        Connection connection = null;
+        Scanner scanner = new Scanner(System.in);
 
-            // Create a scanner for user input
-            Scanner scanner = new Scanner(System.in);
+        try {
+            // Obtenir l'instance Singleton de DatabaseConnection
+            DatabaseConnection dbConnection = DatabaseConnection.getInstance();
+            connection = dbConnection.getConnection();
 
             while (true) {
-                // Display menu to choose between ConsoleUI, ConsoleUIX, and ConsoleUIE
+                // Affichage du menu pour choisir entre ConsoleUI, ConsoleUIX, et ConsoleUIE
+                System.out.println("\n--- Menu Principal ---");
                 System.out.println("1. Run Console of Document");
                 System.out.println("2. Run Console of Users");
                 System.out.println("3. Exit");
@@ -26,19 +27,18 @@ public class Main {
 
                 switch (option) {
                     case 1 -> {
-                        // Run ConsoleUI
+                        // Exécuter ConsoleUI pour la gestion des documents
                         ConsoleUI consoleUI = new ConsoleUI();
                         consoleUI.run();
                     }
                     case 2 -> {
-                        // Run ConsoleUIX
+                        // Exécuter ConsoleUIX pour la gestion des utilisateurs
                         ConsoleUIX consoleUIX = new ConsoleUIX(connection);
                         consoleUIX.run();
                     }
                     case 3 -> {
-                        // Exit the program
+                        // Quitter le programme
                         System.out.println("Exiting...");
-                        scanner.close();
                         return;
                     }
                     default -> System.out.println("Invalid option. Please try again.");
@@ -46,6 +46,17 @@ public class Main {
             }
         } catch (SQLException e) {
             System.out.println("Database connection error: " + e.getMessage());
+        } finally {
+            // Fermer les ressources (connexion et scanner)
+            if (connection != null) {
+                try {
+                    connection.close();
+                    System.out.println("Database connection closed.");
+                } catch (SQLException e) {
+                    System.out.println("Error closing the database connection: " + e.getMessage());
+                }
+            }
+            scanner.close();
         }
     }
 
