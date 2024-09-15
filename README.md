@@ -15,32 +15,45 @@ This project is a library management system designed to manage documents and use
 
 - Java 8
 - PostgreSQL database
+- PostgreSQL JDBC Driver (included in `lib/postgresql-42.7.4.jar`)
 
 ### Setup Instructions
 
-1. **Clone the Repository:**
+1.  **Clone the Repository:**
 
-   ```bash
-   git clone https://github.com/yourusername/library-management-system.git
-   cd library-management-system
-2. **Set Up PostgreSQL Database:**
-      .- Ensure PostgreSQL is installed and running on your machine.
+    Open a terminal or command prompt and run the following commands:
 
-      .- Create a new database named `Biblio`. You can do this using a SQL client or through the command line:
+    ```bash
+    git clone https://github.com/JavaAura/Labrihmi_Naoufal_S1_B2_gestionBiblioV2
+    cd Labrihmi_Naoufal_S1_B2_gestionBiblioV2
+    ```
 
-       ```sql
-       CREATE DATABASE Biblio;
-      .- import the provided SQL schema to set up the necessary tables.
-3. **Compile the Project:**
-   -Ensure you have Java 8 installed on your machine.
+2.  **Set Up PostgreSQL Database:**
+    .- Ensure PostgreSQL is installed and running on your machine.
 
-   -Navigate to the project's root directory using the terminal or command prompt.
+    .- Create a new database named `Biblio`. You can do this using a SQL client or through the command line:
 
-   -Compile the Java source files using the following command. Make sure to replace path/to/postgresql.jar with the actual path to the PostgreSQL JDBC driver JAR file:
+    ```
+    CREATE DATABASE Biblio;
+    ```
 
-           ``` javac -d bin -cp "path/to/postgresql.jar" src/**/*.java ```
+    .- import the Biblio.sql file to set up the necessary tables.
 
-4. **Run the Application:**
-   Run the Application: Execute the compiled Java application using the following command. Replace path/to/postgresql.jar with the actual path to the PostgreSQL JDBC driver JAR file:
-           ```java -cp "bin:path/to/postgresql.jar" presentation.ConsoleUIX ```
- 
+3.  **Configure Database Credentials:**
+    The application uses environment variables to manage database credentials (DB_USERNAME and DB_PASSWORD). Before running the application, ensure that the following environment variables are set in your system:
+
+        -For Linux/macOS: Add the following to your .bashrc, .bash_profile, or .zshrc file and then run source to load the new configuration:
+        ```
+            export DB_USERNAME='your_postgres_username'
+            export DB_PASSWORD='your_postgres_password'
+        ```
+        -For Windows: Set the environment variables using the command prompt:
+        ```
+            setx DB_USERNAME "your_postgres_username"
+            setx DB_PASSWORD "your_postgres_password"
+        ```
+        Or use the system's environment variable settings (Control Panel -> System -> Advanced System Settings -> Environment Variables).
+
+4.  **Run the Application:**
+    The application is packaged as a JAR file. To run it, use the following command from the project root:
+    `java -cp "lib/postgresql-42.7.4.jar:Labrihmi_Naoufal_S1_B2_gestionBiblioV2.jar" Main`
